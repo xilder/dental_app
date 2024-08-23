@@ -1,0 +1,5 @@
+python3 -m unittest tests.test_models.test_engine.test_auth -v
+python3 -m unittest tests.test_models.test_engine.test_db -v
+python3 -m unittest tests.test_api.test_app -v
+python3 -m unittest tests.test_api.test_views.test_auth_view -v
+

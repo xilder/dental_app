@@ -1,0 +1,8 @@
+{
+  "editor.fontLigatures": true,
+  "editor.renderWhitespace": "all",
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.fontFamily": "'Fira Code', 'Droid Sans Mono', 'monospace', monospace"
+}
