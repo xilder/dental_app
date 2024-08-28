@@ -20,6 +20,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
   const [navMenu, setNavMenu] = useState<null | HTMLElement>(null);
   const theme = useTheme();
+  console.log(theme)
   console.log(theme.mixins.toolbar);
   const openNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setNavMenu(event.currentTarget);

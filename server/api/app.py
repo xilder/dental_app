@@ -29,9 +29,9 @@ app.register_blueprint(app_view)
 def before_request():
     """authorise each request"""
     excluded_path = ['/hello', '/api/v1/auth/login', '/api/v1/auth/register']
+    id = session.get('user_id', None)
 
     if AUTH.require_auth(request.path, excluded_path):
-        id = session.get('user_id', None)
         if id is None:
             return make_response(jsonify(error="unauthorised user"), 403)
 

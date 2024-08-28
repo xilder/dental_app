@@ -2,8 +2,12 @@
 
 git add .
 
-read -p "commit message: " cmessage
+read -p "Type (feat, fix, docs, style, refactor, perf, test, chore): " TYPE
+read -p "Scope (describe parts of the code affected): " SCOPE
+read -p "Subject (description of the applied changes): " SUBJECT
+read -p "Body (additional contextual information about the change): " BODY
+read -p "Footer (reference affected code changes): " FOOTER
 
-git commit -m "$cmessage"
+git commit -m "$TYPE($SCOPE): ($SUBJECT)\n\n$BODY\n$FOOTER"
 
 git push

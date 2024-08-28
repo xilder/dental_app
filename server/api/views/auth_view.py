@@ -63,3 +63,10 @@ def delete_user() -> str:
         return make_response(jsonify(error='Account not deleted'), 403)
 
     return make_response(jsonify(message='Account deleted'))
+
+# @app_view.route('/user', methods=['POST'])
+# def update_user():
+#     """updates a user profile"""
+#     id = session.get('user_id')
+#     if not id:
+#         abort(401)

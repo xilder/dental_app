@@ -83,7 +83,7 @@ class DBClient:
             self._session.commit()
             return True
         except Exception:
-            self.__session.rollback()
+            self._session.rollback()
             return False
 
     def reset_database(self):
