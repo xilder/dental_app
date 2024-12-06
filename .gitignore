@@ -2,3 +2,9 @@
 **/__pycache__
 **/dent
 **/node_modules
+**/config
+./typescipt
+./.vscode
+./main
+./dump.rdb
+./push
