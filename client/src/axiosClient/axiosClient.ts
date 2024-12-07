@@ -7,22 +7,22 @@ const axiosClient = axios.create({
   timeout: 10000,
 });
 
-let cookies: unknown[] = [];
+// let cookies: unknown[] = [];
 
-axiosClient.interceptors.response.use((response) => {
-  const sessionCookies = response.headers['set-cookie']
-  if (sessionCookies) {
-    sessionCookies.forEach((cookie) => {
-      cookie = cookie.split(';')[0]
-      cookies.push(cookie)
-    })
-  }
-  return response
-});
+// axiosClient.interceptors.response.use((response) => {
+//   const sessionCookies = response.headers['set-cookie']
+//   if (sessionCookies) {
+//     sessionCookies.forEach((cookie) => {
+//       cookie = cookie.split(';')[0]
+//       cookies.push(cookie)
+//     })
+//   }
+//   return response
+// });
 
-axiosClient.interceptors.request.use((config) => {
-  config.headers.Cookie = cookies.join(';') + ';'
-  return config
-});
+// axiosClient.interceptors.request.use((config) => {
+//   config.headers.Cookie = cookies.join(';') + ';'
+//   return config
+// });
 
 export default axiosClient
