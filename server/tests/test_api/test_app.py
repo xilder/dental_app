@@ -4,7 +4,7 @@ from config import config
 from models.engine.auth import Auth
 
 
-conf = config['dev']
+conf = config.dev
 URL = conf.URL
 AUTH = Auth()
 

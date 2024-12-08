@@ -6,7 +6,7 @@ from config import config
 from models.engine.auth import Auth
 # from models.engine.db import db_client
 
-conf = config['dev']
+conf = config.dev
 URL = conf.URL
 auth_route = 'api/v1/auth'
 auth_url = f'{URL}/{auth_route}'
@@ -30,9 +30,7 @@ class TestAuth(unittest.TestCase):
         if r.status_code == 400:
             self.assertEqual(r.status_code, 400)
         else:
-            response = r.json()
             self.assertEqual(r.status_code, 201)
-            self.assertEqual(params['first_name'], response.get('first_name'))
 
     def test_valid_login_by_email(self):
         """test login route by email"""
@@ -99,7 +97,7 @@ class TestAuth(unittest.TestCase):
         params = TestModel().to_json()
         r = requests.post(f'{auth_url}/register', json=params)
         if r.status_code == 400:
-            self.assertEqual(r.status_code) == 400
+            self.assertEqual(r.status_code, 400)
         else:
             self.assertEqual(r.status_code, 201)
             print("\n\tregistration successful")

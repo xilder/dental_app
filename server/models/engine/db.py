@@ -64,16 +64,17 @@ class DBClient:
             user = self.find_obj_by(cls, username=username).first()
         return user
 
-    def update(self, cls: str, obj_id: str, **kwargs: dict[str: str | int]) -> T:
+    def update(self, cls: str, obj_id: str, **kwargs) -> T:
         """updates an object"""
         try:
             obj = self.find_obj_by(cls, id=obj_id).first()
             obj.update(**kwargs)
             self.add(obj)
             return True
-        except Exception:
+        except Exception as e:
             self._session.rollback()
-            return False
+            raise Exception('failed update')
+            # return False
 
     def delete_obj(self, id: str) -> bool:
         """deletes an object from the database"""

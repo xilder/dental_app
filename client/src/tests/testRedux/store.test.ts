@@ -7,12 +7,12 @@ import {
 } from '../../redux/reducers/userReducer';
 import User from '../model.test';
 import { describe, expect, test, beforeEach } from '@jest/globals';
-import UserInterface from '../../interfaces/userInterface';
+import UserInterface from '../../interfaces/userData';
 
 beforeEach(async () => {
   await store.dispatch(reset());
   const defaultStorage = await store.getState();
-  await expect(defaultStorage.user.first_name).toBeNull();
+  await expect(defaultStorage.user.first_name).toBe('');
 });
 
 describe('test part of the global state', () => {
@@ -51,6 +51,6 @@ describe('test part of the global state', () => {
     await store.dispatch(deleteUser());
     const updatedStorage = await store.getState();
     const userProfile = await updatedStorage.user;
-    await expect(userProfile.first_name).toBeNull();
+    await expect(userProfile.first_name).toBe('');
   });
 });
