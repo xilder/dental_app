@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import UserInterface from '../interfaces/userData';
+import UserInterface from '../interfaces/userInterface';
 
 export default class User implements UserInterface {
   id?: string;

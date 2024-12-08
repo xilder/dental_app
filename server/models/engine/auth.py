@@ -1,48 +1,24 @@
 #!usr/bin/python3
 from uuid import uuid4
-from errors.account_error import UnconfirmedAccountError
 from sqlalchemy.orm.exc import NoResultFound
 from models.engine.db import db_client
 from bcrypt import checkpw, hashpw, gensalt
 from models.user import User
-from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
-from config import config
 # from flask import session
-
 
 def _hash_password(password: str) -> bytes:
     """returns the hashed value of a password"""
-    return hashpw(password.encode("utf-8"), gensalt())
-
+    return hashpw(password.encode('utf-8'), gensalt())
 
 def _generate_uuid() -> str:
     """returns the string value of a uuid"""
     return str(uuid4())
 
-
-def verify_token(token):
-    try:
-        serialiser = URLSafeTimedSerializer(config.dev.SECRET_KEY)
-        email = serialiser.loads(
-        token, salt=config.dev.SECURITY_PASSWORD_SALT, max_age=3600
-        )
-        return email
-    except BadSignature as e:
-        raise e
-    except SignatureExpired as e:
-        raise e
-
-
-def generate_confirmation_token(email) -> str:
-    """Generates a signed confirmation token"""
-    serialiser = URLSafeTimedSerializer(config.dev.SECRET_KEY)
-    token = serialiser.dumps(email, salt=config.dev.SECURITY_PASSWORD_SALT)
-    return token
-
+def generate_confirmation_token() -> str:
+    """"""
 
 class Auth:
     """handles the authentication process of this app"""
-
     def __init__(self):
         """initialises an instance of the Auth class"""
         self._db = db_client
@@ -60,7 +36,7 @@ class Auth:
                 return False
             elif path.startswith(excluded_path):
                 return False
-            elif excluded_path[-1] == "*":
+            elif excluded_path[-1] == '*':
                 if path.startswith(excluded_path[:-1]):
                     return False
 
@@ -68,14 +44,14 @@ class Auth:
 
     def register_user(self, **kwargs: dict) -> User:
         """registers a new user"""
-        email = kwargs.get("email")
-        username = kwargs.get("username")
-        password = _hash_password(kwargs.get("password"))
-        kwargs["password"] = password
+        email = kwargs.get('email')
+        username = kwargs.get('username')
+        password = _hash_password(kwargs.get('password'))
+        kwargs['password'] = password
         try:
-            if self._db.find_obj_by("user", email=email).first():
+            if self._db.find_obj_by('user', email=email).first():
                 raise ValueError(f"{email} is registered email")
-            if self._db.find_obj_by("user", username=username).first():
+            if self._db.find_obj_by('user', username=username).first():
                 raise ValueError(f"{username} is a registered username")
         except NoResultFound:
             pass
@@ -83,28 +59,20 @@ class Auth:
         user = User(**kwargs)
         id = user.id
         self._db.add(user)
-        x_user = self._db.find_obj_by("user", id=id).first()
+        x_user = self._db.find_obj_by('user', id=id).first()
         return x_user
-
-    def update(self, id, **params):
-        return self._db.update(cls="user", obj_id=id, **params)
 
     def valid_login(self, **kwargs: dict) -> User:
         """returns true if user's credentials are valid"""
-        try:
-            user = self._db.find_user("user", **kwargs)
-            if not user.confirmed:
-                raise UnconfirmedAccountError('Please check your email for  confirmation link')
-            if not user:
-                return None
-            password = kwargs.get("password", None)
-            if not password:
-                return None
-            if checkpw(password.encode("utf-8"), user.password.encode("utf-8")):
-                return user
+        user = self._db.find_user('user', **kwargs)
+        if not user:
             return None
-        except Exception as e:
-            raise e
+        password = kwargs.get('password', None)
+        if not password:
+            return None
+        if checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            return user
+        return None
 
     # def create_session(self, email: str) -> str:
     #     try:
@@ -129,42 +97,22 @@ class Auth:
     #     """destroys a session by setting user session_id to None"""
     #     return self._db.update('user', user_id, session=None)
 
-    def get_reset_token(self, email: str) -> str:
-        """generates a reset token"""
+    def get_reset_password_token(self, email: str) -> str:
+        """generates a reset token for retrieval of password"""
         try:
-            user = self._db.find_obj_by('user', email=email).first()
-            token = generate_confirmation_token(email)
-            # if token is None:
-            #     raise ValueError
-            success = self._db.update("user", user.id, token=token)
-            if not success:
-                raise Exception('failed update')
+            user =  self._db.find_obj_by(email=email).first()
+            token = _generate_uuid()
+            self._db.update('user', user.id, reset_token=token)
             return token
-        except Exception as e:
-            raise e
-            # return None
-
-    def get_user_from_token(self, token) -> User | None:
-        """returns a user id token is valid"""
-        try:
-            verified = verify_token(token)
-            return self._db.find_obj_by("user", email=verified).first()
-        except SignatureExpired as e:
-            from tasks.accounts_task import send_verification_message
-            user = self._db.find_obj_by("user", token=token).first()
-            send_verification_message(user)
-            raise e
-        except Exception as e:
-            raise e
-            # return None
+        except Exception:
+            return None
 
     def update_password(self, token: str, password: str) -> bool:
         """updates a user password"""
         try:
-            user = self._db.find_obj_by("user", token=token).first()
-            self._db.update(
-                "user", user.id, password=_hash_password(password), token=None
-            )
+            user = self._db.find_obj_by('user', reset_token=token).first()
+            hashed_password = _hash_password(password)
+            self._db.update('user', user.id, password=hashed_password)
             return True
         except Exception:
             return False
