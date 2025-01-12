@@ -13,12 +13,11 @@ const style = {
   transform: 'translate(-50%, -50%)',
   width: 400,
   bgcolor: 'background.paper',
-  border: '2px solid #F00',
   boxShadow: 24,
   p: 4,
 };
 
-const InfoModal: React.FC<{
+const ErrorModal: React.FC<{
   info: string | undefined;
   openModal: boolean;
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
@@ -36,11 +35,11 @@ const InfoModal: React.FC<{
         aria-labelledby='account authentication error'
         aria-describedby='error accessing the server'
       >
-        <Box sx={style}>
+        <Box sx={{ ...style, border: '2px solid #F00' }}>
           <Typography variant='h6' component='h2' sx={{ textAlign: 'center' }}>
-            Error!
+            ERROR!
           </Typography>
-          <Divider sx={{ bgColor: '#FOO', color: '#FOO', fontSize: '5px'}} />{' '}
+          <Divider sx={{ borderColor: '#F00', fontSize: '5px' }} />{' '}
           <Typography sx={{ mt: 2 }}>{info}</Typography>
         </Box>
       </Modal>
@@ -48,4 +47,36 @@ const InfoModal: React.FC<{
   );
 };
 
-export default InfoModal;
+const InfoModal: React.FC<{
+  email: string | undefined;
+  openModal: boolean;
+  setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ email, openModal, setOpenModal }) => {
+  const dispatch = useAppDispatch();
+
+  return (
+    <div>
+      <Modal
+        open={openModal}
+        onClose={() => {
+          dispatch(reset());
+          setOpenModal(false);
+        }}
+        aria-labelledby='account authentication error'
+        aria-describedby='error accessing the server'
+      >
+        <Box sx={{ ...style, border: '2px solid #0F0' }}>
+          <Typography variant='h6' component='h2' sx={{ textAlign: 'center' }}>
+            INFO
+          </Typography>
+          <Divider sx={{ borderColor: '#0F0', fontSize: '5px' }} />{' '}
+          <Typography
+            sx={{ mt: 2 }}
+          >{`PLEASE CHECK YOUR EMAIL (${email}) FOR CONFIRMATION LINK`}</Typography>
+        </Box>
+      </Modal>
+    </div>
+  );
+};
+
+export { InfoModal, ErrorModal };
