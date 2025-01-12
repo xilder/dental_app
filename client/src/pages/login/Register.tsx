@@ -13,8 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../hooks/storeHooks';
-import { registerUser, removeInfo } from '../../redux/reducers/userReducer';
-import InfoModal from '../../components/infoModal';
+import { registerUser } from '../../redux/reducers/userReducer';
+import { InfoModal, ErrorModal } from '../../components/infoModal';
 import RegistrationInterface from '../../interfaces/registrationData';
 import { registerSchema } from '../../constants/schema';
 const Register: React.FC<{
@@ -22,8 +22,10 @@ const Register: React.FC<{
 }> = ({ setPage }) => {
   const theme = useTheme();
   // allows enables navigation for this page to the next page
+  const [email, setEmail] = useState('');
   const [switchPage, setSwitchPage] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [modalType, setModalType] = useState<'info' | 'error'>('info');
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
   const navigate = useNavigate();
@@ -34,22 +36,23 @@ const Register: React.FC<{
   const { errors, isDirty, isValid, isSubmitting } = formState;
   const submitData = async (data: RegistrationInterface) => {
     await dispatch(registerUser(data));
+    setEmail(data.email);
     setSwitchPage(true);
   };
 
   useEffect(() => {
-    // if the registerUser function does make give the user.error a value then switch to the next page for the account confirmation instructions
     if (user.serverResponse?.error) {
-      setOpenModal(true);
-      // dispatch(removeInfo());
       setSwitchPage(false);
+      setModalType('error');
+      setOpenModal(true);
     }
     if (!user.serverResponse?.error && switchPage) {
-      console.log(user);
-      // dispatch(removeInfo());
-      navigate('/confirm_account');
+      setSwitchPage(false);
+      setModalType('info');
+      setOpenModal(true);
+      console.log(modalType)
     }
-  }, [user, switchPage, navigate, setOpenModal]);
+  }, [user, switchPage, navigate, setOpenModal, email, modalType]);
 
   return (
     <Container
@@ -243,11 +246,19 @@ const Register: React.FC<{
           </Container>
         </Slide>
       </Container>
-      <InfoModal
-        info={user.serverResponse?.message}
-        openModal={openModal}
-        setOpenModal={setOpenModal}
-      />
+      {modalType === 'info' ? (
+        <InfoModal
+          email={email}
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+        />
+      ) : (
+        <ErrorModal
+          info={user.serverResponse?.message}
+          openModal={openModal}
+          setOpenModal={setOpenModal}
+        />
+      )}
     </Container>
   );
 };

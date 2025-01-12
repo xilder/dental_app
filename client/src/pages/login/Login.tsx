@@ -16,7 +16,7 @@ import { useAppDispatch, useAppSelector } from '../../hooks/storeHooks';
 import LoginInterface from '../../interfaces/loginData';
 import { loginSchema } from '../../constants/schema';
 import { loginUser } from '../../redux/reducers/userReducer';
-import InfoModal from '../../components/infoModal';
+import {ErrorModal} from '../../components/infoModal';
 
 const Login: React.FC<{
   setPage: React.Dispatch<React.SetStateAction<string>>;
@@ -37,6 +37,7 @@ const Login: React.FC<{
   const submitData = async (data: LoginInterface) => {
     await dispatch(loginUser(data));
     setSwitchPage(true);
+    // console.log(user)
   };
 
   useEffect(() => {
@@ -49,7 +50,8 @@ const Login: React.FC<{
     if (!user.serverResponse?.error && switchPage) {
       setSwitchPage(false);
       // navigates to the profile page
-      navigate('/profile');
+      if (user.name && user.confirmed) navigate(`/${user.name}`);
+      // console.log(user)
     }
   }, [user, switchPage, setSwitchPage, setOpenModal, navigate]);
 
@@ -201,7 +203,7 @@ const Login: React.FC<{
           </Container>
         </Slide>
       </Container>
-      <InfoModal
+      <ErrorModal
         info={user.serverResponse?.message}
         openModal={openModal}
         setOpenModal={setOpenModal}
