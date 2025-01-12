@@ -15,7 +15,10 @@ export const registerUser = createAsyncThunk(
   async (params: UserData, thunkApi) => {
     // const { first_name, last_name, email, username, password } = params;
     try {
-      const response = await axiosClient.post('/api/v1/auth/register', params);
+      const response = await axiosClient.post(
+        '/api/v1/auth/register/patient',
+        params
+      );
       return response.data;
     } catch (e: any) {
       return thunkApi.rejectWithValue(e.response.data);
@@ -29,8 +32,6 @@ export const loginUser = createAsyncThunk(
   async (params: LoginDetails, thunkApi) => {
     try {
       const response = await axiosClient.post(`/api/v1/auth/login`, params);
-      // const cookies = await response.headers['set-cookie']
-      // console.log(cookies)
       return response.data;
     } catch (e: any) {
       return thunkApi.rejectWithValue(e.response.data);
@@ -66,6 +67,7 @@ const defaultState: UserData = {
     error: false,
     message: '',
   },
+  name: '',
 };
 
 const userSlice = createSlice({
@@ -77,6 +79,10 @@ const userSlice = createSlice({
       ...state,
       loading: false,
       serverResponse: { error: false, message: '' },
+    }),
+    getProfileAction: (_, action) => ({
+      ...defaultState,
+      ...action.payload,
     }),
   },
   extraReducers: (builder) => {
@@ -106,17 +112,24 @@ const userSlice = createSlice({
           message: action.payload as string,
         },
       }))
-      .addCase(registerUser.fulfilled, () => defaultState)
+      .addCase(registerUser.fulfilled, (_, action) => ({
+        ...defaultState,
+        serverResponse: { error: false, message: action.payload as string },
+      }))
       .addCase(registerUser.pending, () => ({
         ...defaultState,
         loading: true,
+        serverResponse: {
+          error: false,
+          message: '',
+        },
       }))
       .addCase(registerUser.rejected, (_, action) => ({
         ...defaultState,
         loading: false,
         serverResponse: {
-          error: false,
-          message: '',
+          error: true,
+          message: action.payload as string,
         },
       }))
       .addCase(deleteUser.fulfilled, () => defaultState)
@@ -139,5 +152,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { reset, removeInfo } = userSlice.actions;
+export const { reset, removeInfo, getProfileAction } = userSlice.actions;
 export default userSlice.reducer;
