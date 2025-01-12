@@ -1,6 +1,8 @@
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import ChatIcon from '@mui/icons-material/Chat';
 import VideoChatIcon from '@mui/icons-material/VideoChat';
+import PersonIcon from '@mui/icons-material/Person';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 export const homepageLinks = [
   {
@@ -37,7 +39,7 @@ export const homepageServices = [
   {
     icon: VideoChatIcon,
     type: 'Secure Video Consultation',
-    text: 'Access a vast network of trusted dental professionals, providing you with personalised care and expert advice tailored to your needs.',
+    text: 'Access a vast network of trusted dental professionals, providing you with personalisedl care and expert advice tailored to your needs.',
   },
   {
     icon: ChatIcon,
@@ -69,9 +71,9 @@ export const homepageInfo = [
   {
     label: 'About Us',
     infoLinks: [
-      { name: 'Contact Us', link: '', },
-      { name: 'Services', link: '', },
-      {  name: 'Our Process', link: '', },
+      { name: 'Contact Us', link: '' },
+      { name: 'Services', link: '' },
+      { name: 'Our Process', link: '' },
     ],
   },
   {
@@ -89,4 +91,10 @@ export const homepageInfo = [
       { name: 'LinkedIn', link: '' },
     ],
   },
+];
+
+export const patientDrawer = [
+  { name: 'Profile', icon: PersonIcon },
+  { name: 'Chat', icon: ChatIcon },
+  { name: 'Setting', icon: SettingsIcon },
 ];

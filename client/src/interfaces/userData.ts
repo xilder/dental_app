@@ -9,9 +9,10 @@ export default interface UserData {
   updated_at?: string;
   serverResponse?: {
     error?: boolean;
-    message?: string
-  }
+    message?: string;
+  };
   loading?: boolean;
-  confirmed?: boolean,
-  authenticated?: boolean,
+  confirmed?: boolean;
+  authenticated?: boolean;
+  name?: string;
 }
