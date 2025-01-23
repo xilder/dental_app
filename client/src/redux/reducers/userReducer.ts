@@ -5,7 +5,7 @@ import UserData from '../../interfaces/userData';
 
 interface LoginDetails {
   data?: string;
-  password: string | undefined;
+  password?: string;
 }
 
 // let serverError: string = 'eee';
@@ -24,6 +24,19 @@ export const registerUser = createAsyncThunk(
       return thunkApi.rejectWithValue(e.response.data);
     }
     // console.log(response.data, response.status)
+  }
+);
+
+export const loginProfile = createAsyncThunk(
+  'profile/login',
+  async (_, thunkApi) => {
+    try {
+      const response = await axiosClient.get('api/v1/auth/profile');
+      console.log(response.data);
+      return response.data;
+    } catch (e: any) {
+      return thunkApi.rejectWithValue(e.response.data);
+    }
   }
 );
 
@@ -106,6 +119,31 @@ const userSlice = createSlice({
       }))
       .addCase(loginUser.rejected, (_, action) => ({
         ...defaultState,
+        loading: false,
+        serverResponse: {
+          error: true,
+          message: action.payload as string,
+        },
+      }))
+      .addCase(loginProfile.fulfilled, (state, action) => ({
+        ...state,
+        ...action.payload,
+        loading: false,
+        serverResponse: {
+          error: false,
+          message: '',
+        },
+      }))
+      .addCase(loginProfile.pending, (state) => ({
+        ...state,
+        loading: true,
+        serverResponse: {
+          error: false,
+          message: '',
+        },
+      }))
+      .addCase(loginProfile.rejected, (state, action) => ({
+        ...state,
         loading: false,
         serverResponse: {
           error: true,
