@@ -4,5 +4,13 @@
   "editor.wordWrap": "wordWrapColumn",
   "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.fontFamily": "'Fira Code', 'Droid Sans Mono', 'monospace', monospace"
+  "editor.fontFamily": "'Fira Code', 'Droid Sans Mono', 'monospace', monospace",
+  "python.analysis.extraPaths": ["./server"],
+  "python.pipenvPath": "${env:HOME}/dental_app/dent/bin/pipenv",
+  "python.poetryPath": "${env:HOME}/dental_app/dent/bin/poetry",
+  "python.analysis.autoImportCompletions": true,
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "python.analysis.typeCheckingMode": "standard"
 }
