@@ -18,7 +18,7 @@ class Config():
     ADMIN = os.getenv('ADMIN')
 
     # session variables
-    SESSION_KEY_PREFIX = 'session:'
+    # SESSION_KEY_PREFIX = 'session:'
     PERMANENT_SESSION_LIFETIME = timedelta(days=1)
     SESSION_PERMANENT = True
     SESSION_TYPE = 'redis'

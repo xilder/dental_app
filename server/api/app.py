@@ -1,4 +1,4 @@
-#!/usr/bin.env python3
+#!/usr/bin/env python3
 import logging
 from flask import Flask, jsonify, make_response, request, session
 from flask_session import Session
@@ -6,13 +6,15 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from flask_mail import Mail
 from celery import Celery
+
+# from api.chats.peer_connection import PeerConnection
 from api.chats.patient_chat import Chat
 
 # from api.chats import AdminNamespace
 from config import config
 from models.engine.db import db_client
 from os import getenv
-from api.views import app_view, validate_view
+from api.views import app_view, validate_view, chat_view, resource_view
 from models.engine.auth import Auth
 from log_handlers import mail_handler, file_handler
 
@@ -26,7 +28,8 @@ app.url_map.strict_slashes = False
 
 # add socketio
 sio = SocketIO(app, cors_allowed_origins="*", transport=["websocket"])
-sio.on_namespace(Chat('/chats'))
+sio.on_namespace(Chat("/chats"))
+# sio.on_namespace(PeerConnection('/peer'))
 # sio.on_namespace('/admin', AdminNamespace)
 
 # add mail
@@ -37,7 +40,8 @@ celery = Celery(app.name, broker=app.config["CELERY_BROKER_URL"])
 celery.conf.update(app.config)
 
 # initialise extensions
-CORS(app, resources={r"*": {"origins": "*"}}, supports_credentials=True)
+CORS(app, supports_credentials=True)
+# resources={r"*": {"origins": "*"}},
 
 # session configuration
 Session(app)
@@ -45,6 +49,8 @@ Session(app)
 # register blueprints
 app.register_blueprint(app_view)
 app.register_blueprint(validate_view)
+app.register_blueprint(chat_view)
+app.register_blueprint(resource_view)
 
 # initialise app logger
 app_logger.setLevel(logging.INFO)
@@ -79,6 +85,8 @@ def before_request():
     id = session.get("user_id", None)
 
     # app_logger.info('new request')
+    if request.method == "OPTIONS":
+        return make_response("okay", 200)
 
     if AUTH.require_auth(request.path, excluded_path):
         if id is None:
@@ -109,11 +117,15 @@ def test_path():
     user = session["user"]
     # user = user_obj.to_json()
     message = f"{user['username']} is logged in"
-    load = {"email": user["email"], "username": user["username"], "message": message}
+    load = {
+        "email": user["email"],
+        "username": user["username"],
+        "message": message,
+    }
     return make_response(jsonify(load))
 
 
 if __name__ == "__main__":
     host = getenv("API_HOST", "localhost")
     port = getenv("API_PORT", 5000)
-    sio.run(app, host=host, port=port, debug=True)
+    sio.run(app, host=host, port=int(port), debug=True)
