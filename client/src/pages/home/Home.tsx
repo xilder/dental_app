@@ -23,6 +23,8 @@ import {
 } from '../../constants/nav';
 import ChatIcon from '@mui/icons-material/Chat';
 import ChatUI from '../../components/chatUI';
+import heroImage from '../../images/hero-image.jpg';
+import portrait from '../../images/portrait.jpg';
 
 const Home = () => {
   const theme = useTheme();
@@ -47,6 +49,8 @@ const Home = () => {
         <Box
           sx={{
             ...theme.mixins.toolbar,
+            zIndex: '100',
+            backgroundColor: 'red'
           }}
         ></Box>
         <Box
@@ -94,8 +98,22 @@ const Home = () => {
             Schedule Now
           </Button>
         </Box>
-        <Box sx={{ flexGrow: 1, width: '100%' }}>
-          <Skeleton key={'why'} variant='rectangular' sx={{ height: '100%' }}></Skeleton>
+        <Box
+          sx={{
+            flex: 1,
+            width: '100%',
+            // border: '1px solid red',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          {/* <Box
+            component='img'
+            alt='hero image'
+            src={heroImage}
+            sx={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+          /> */}
         </Box>
         <Grid
           container
@@ -817,10 +835,13 @@ const Home = () => {
           }}
           onClick={() => setShowChat(true)}
         >
-          <ChatIcon fontSize='small' sx={{color: theme.palette.primary.main}}/>
+          <ChatIcon
+            fontSize='small'
+            sx={{ color: theme.palette.primary.main }}
+          />
         </IconButton>
       )}
-    {showChat && <ChatUI setShowChat={setShowChat} />}
+      {showChat && <ChatUI setShowChat={setShowChat} />}
     </>
   );
 };

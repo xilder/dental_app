@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import {
   Button,
   Container,
@@ -17,7 +17,7 @@ import { registerUser } from '../../redux/reducers/userReducer';
 import { InfoModal, ErrorModal } from '../../components/infoModal';
 import RegistrationInterface from '../../interfaces/registrationData';
 import { registerSchema } from '../../constants/schema';
-const Register: React.FC<{
+const Register: FC<{
   setPage: React.Dispatch<React.SetStateAction<string>>;
 }> = ({ setPage }) => {
   const theme = useTheme();
@@ -50,7 +50,6 @@ const Register: React.FC<{
       setSwitchPage(false);
       setModalType('info');
       setOpenModal(true);
-      console.log(modalType)
     }
   }, [user, switchPage, navigate, setOpenModal, email, modalType]);
 
@@ -188,6 +187,7 @@ const Register: React.FC<{
                       size='small'
                       label='PASSWORD'
                       variant='standard'
+                      type='password'
                       {...register('password')}
                       error={errors.password ? true : false}
                       helperText={errors.password?.message}
@@ -196,6 +196,7 @@ const Register: React.FC<{
                       size='small'
                       label='CONFIRM PASSWORD'
                       variant='standard'
+                      type='password'
                       {...register('confirm_password')}
                       error={errors.confirm_password ? true : false}
                       helperText={errors.confirm_password?.message}
