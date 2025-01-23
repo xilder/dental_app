@@ -1,70 +1,90 @@
-import React, { useEffect, useState } from 'react';
-import {
-  Typography,
-  Card,
-  CardMedia,
-  CardContent,
-  Box,
-  Container,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  TextField,
-} from '@mui/material';
+import { useEffect, useState, FC } from 'react';
+import { Box, TextField, IconButton, Button } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
-import ChatMessageArray, {
-  chatFormat,
-  ChatMessage,
-} from '../../../interfaces/message';
-import theme from '../../../theme/theme';
-import { io } from 'socket.io-client';
-import axios from 'axios';
+import { ChatMessage } from '../../../interfaces/message';
+import { Socket } from 'socket.io-client';
+import moment from 'moment';
+import UserData from '../../../interfaces/userData';
+import PatientChatCard from './patientChatComponents/patientChatCard';
+import ChatDisplay from './patientChatComponents/chatDisplay';
 
-const PatientChat = () => {
+const PatientChat: FC<{ client: Socket; user: UserData }> = ({
+  client,
+  user,
+}) => {
   const [newMessage, setNewMessage] = useState('');
-  const [messages, setMessages] = useState<ChatMessageArray>(chatFormat);
-  const client = io('http://localhost:5000/', {
-    transports: ['websocket'],
-  });
-  client.on('connect', () => {
-    console.log('Connected using:', client);
-  });
-  client.on(
-    'offline_message',
-    (data: { sender_id: string; text: string; created_at: string }) => {
-      const sender_id = data.sender_id;
-      const senderHistory = messages[sender_id];
-      senderHistory.push({ ...data, receiver_id: 'me' });
-      setMessages((prevMessages) => ({ ...prevMessages, senderHistory }));
-    }
+  // const [messages, setMessages] = useState<ChatMessageArray>(chatFormat);
+  const [messages, setMessages] = useState<{ [key: string]: ChatMessage[] }>(
+    {}
   );
+  const [users, setUsers] = useState<string[]>(['']);
+  const [receiverID, setReceiverID] = useState('');
 
-  const getChatHistory = async () => {
-    const messageHistory: ChatMessageArray = await axios.get(
-      '/api/v1/chat/history'
-    );
-    setMessages((prevMessage) => ({ ...prevMessage, ...messageHistory }));
-  };
+  client.on('users', (data: string[]) => {
+    setUsers([...data]);
+  });
 
-  const handleSendMessage = (receiver: string, sender: string) => {
+  // client.on(
+  //   'message',
+  //   (data: {
+  //     id: string;
+  //     text: string;
+  //     sender_id: string;
+  //     receiver_id: string;
+  //     created_at: string;
+  //   }) => {
+  //     const date = moment(data.created_at, 'HH:mm:ss dddd - MMMM D, YYYY');
+  //     const messageObj = { ...data, created_at: date };
+  //     setMessages((prev) => ({
+  //       ...prev,
+  //       [data.sender_id]: [...(prev[data.sender_id] || []), messageObj],
+  //     }));
+  //   }
+  // );
+
+  // client.on(
+  //   'offline_message',
+  //   (data: { sender_id: string; text: string; created_at: string }) => {
+  //     const sender_id = data.sender_id;
+  //     const senderHistory = messages[sender_id];
+  //     senderHistory.push({ ...data, receiver_id: 'me' });
+  //     setMessages((prevMessages) => ({ ...prevMessages, senderHistory }));
+  //   }
+  // );
+
+  // const getChatHistory
+  //  = async () => {
+  //   const messageHistory: ChatMessageArray = await axios.get(
+  //     '/api/v1/chat/history'
+  //   );
+  //   setMessages((prevMessage) => ({ ...prevMessage, ...messageHistory }));
+  // };
+
+  const handleSendMessage = (id: string) => {
     if (newMessage.trim() !== '') {
       try {
-        client.emit('message', {
-          sender_id: sender,
-          receiver_id: receiver,
+        const data = {
+          receiver_id: id,
           text: newMessage,
-        });
+        };
+        client.emit('send_message', data);
         setNewMessage('');
       } catch {
         setNewMessage(newMessage);
       }
     }
   };
+  const [a, setA] = useState(0)
+
 
   useEffect(() => {
-    getChatHistory();
-  }, []);
+    // getChatHistory();
+    client.on('receive_message', (data: ChatMessage) => {
+      setA(prev => prev + 1)
+      console.log(data);
+      console.log(a);
+    });
+  }, [client, a]);
 
   return (
     <Box
@@ -89,49 +109,8 @@ const PatientChat = () => {
           height: '100%',
         }}
       >
-        <Card
-          sx={{
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            flexDirection: 'row',
-            mx: '',
-            backgroundColor: theme.palette.primary.light,
-          }}
-        >
-          <CardMedia
-            sx={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              border: '1px solid black',
-              m: '5px',
-            }}
-          ></CardMedia>
-          <CardContent>
-            <Typography variant='h6'>Name</Typography>
-          </CardContent>
-        </Card>
-        <List sx={{ flexGrow: 1, overflowY: 'scroll', width: '100%' }}>
-          {Object.entries(messages).map(([receiver, messages]) => (
-            <ListItem
-              key={receiver}
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-                // border: '1px solid black',
-              }}
-            >
-              <ListItemText
-                sx={{ flex: 1 }}
-                primary={receiver}
-                secondary={messages[messages.length - 1].text}
-              />
-            </ListItem>
-          ))}
-        </List>
+        {/* <ChatDisplay id={receiverID} messages={messages[receiverID]} /> */}
+        <Box sx={{ flex: 1, border: '1px solid red' }}></Box>
         <Box
           sx={{ p: 1, display: 'flex', alignItems: 'center', width: '100%' }}
         >
@@ -142,9 +121,9 @@ const PatientChat = () => {
             placeholder='Type your message...'
             multiline={true}
           />
-          {/* <IconButton onClick={handleSendMessage}>
+          <IconButton onClick={() => handleSendMessage(receiverID)}>
             <SendIcon />
-          </IconButton> */}
+          </IconButton>
         </Box>
       </Box>
       <Box
@@ -161,20 +140,31 @@ const PatientChat = () => {
           borderLeft: '2px solid black',
         }}
       >
-        <Card sx={{ display: 'flex', width: '100%' }}>
-          <CardMedia
-            sx={{
-              height: '40px',
-              width: '40px',
-              borderRadius: '50%',
-              // border: '1px solid red',
-            }}
-          ></CardMedia>
-          <CardContent>
-            <Typography>Name</Typography>
-          </CardContent>
-        </Card>
+        {users.length > 0 &&
+          users.map((user_id) => {
+            if (user_id !== user.id) {
+              return (
+                <Box
+                  key={user_id}
+                  sx={{ width: '100%' }}
+                  onClick={() => {
+                    console.log(user_id);
+                    setReceiverID(user_id);
+                  }}
+                >
+                  <PatientChatCard id={user_id} />
+                </Box>
+              );
+            }
+            return null;
+          })}
       </Box>
+      <Button
+        onClick={() => client.emit('users', 'online')}
+        sx={{ position: 'absolute', right: '10px', bottom: '10px' }}
+      >
+        Load Users
+      </Button>
     </Box>
   );
 };

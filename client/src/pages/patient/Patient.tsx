@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
-  Container,
   Icon,
   List,
   ListItemButton,
@@ -13,15 +12,28 @@ import { patientDrawer } from '../../constants/nav';
 import PatientProfile from './patientComponents/patientProfile';
 import PatientChat from './patientComponents/patientChat';
 import PatientSetting from './patientComponents/patientSetting';
+import { io } from 'socket.io-client';
 import { useAppSelector } from '../../hooks/storeHooks';
-import { useNavigate } from 'react-router-dom';
 
 const Patient = () => {
+  const user = useAppSelector((store) => store.user);
   const theme = useTheme();
   const [pageDisplayed, setPageDisplayed] = useState('Profile');
   const handlePageDisplayed = (value: string) => {
     setPageDisplayed(value);
   };
+  const [client] = useState(
+    io('http://localhost:5000/chats', { transports: ['websocket'] })
+  );
+
+  useEffect(() => {
+    client.on('connect', () => {
+      console.log('Connected using:', client);
+    });
+    return () => {
+      client.disconnect()
+    }
+  }, [client]);
 
   return (
     <Box
@@ -31,7 +43,7 @@ const Patient = () => {
         alignItems: 'center',
         height: '100vh',
         width: '100%',
-        flexDirection: 'column'
+        flexDirection: 'column',
       }}
     >
       <Box
@@ -45,7 +57,7 @@ const Patient = () => {
           justifyContent: 'center',
           alignItems: 'center',
           height: '100%',
-          width: '100%'
+          width: '100%',
           // border: '5px solid green',
         }}
       >
@@ -63,6 +75,7 @@ const Patient = () => {
           <List>
             {patientDrawer.map((item) => (
               <ListItemButton
+                key={item.name}
                 onClick={() => {
                   handlePageDisplayed(item.name);
                 }}
@@ -85,13 +98,13 @@ const Patient = () => {
           }}
         >
           {pageDisplayed === 'Profile' ? (
-            <PatientProfile />
+            <PatientProfile user={user} />
           ) : pageDisplayed === 'Chat' ? (
-            <PatientChat />
+            <PatientChat client={client} user={user} />
           ) : pageDisplayed === 'Setting' ? (
             <PatientSetting />
           ) : (
-            <PatientProfile />
+            <PatientProfile user={user} />
           )}
         </Box>
       </Box>
