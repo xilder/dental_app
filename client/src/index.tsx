@@ -5,6 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import store from './redux/store';
 import theme from './theme/theme';
 
@@ -15,7 +17,9 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <ThemeProvider theme={theme}>
+        <LocalizationProvider dateAdapter={AdapterMoment}>
         <App />
+        </LocalizationProvider>
       </ThemeProvider>
     </Provider>
   </React.StrictMode>
