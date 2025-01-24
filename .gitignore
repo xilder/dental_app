@@ -3,8 +3,9 @@
 **/dent
 **/node_modules
 **/config
-./typescipt
+./typescript
 ./.vscode
 ./main
-./dump.rdb
-./push
+**/dump.rdb
+**/push
+**/main./typescript

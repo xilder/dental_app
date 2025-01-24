@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 import {
   Button,
   Container,
@@ -15,10 +15,11 @@ import { useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../hooks/storeHooks';
 import LoginInterface from '../../interfaces/loginData';
 import { loginSchema } from '../../constants/schema';
-import { loginUser } from '../../redux/reducers/userReducer';
-import InfoModal from '../../components/infoModal';
+import { loginUser, loginProfile, getProfileAction } from '../../redux/reducers/userReducer';
+import { ErrorModal } from '../../components/infoModal';
+import axiosClient from '../../axiosClient/axiosClient';
 
-const Login: React.FC<{
+const Login: FC<{
   setPage: React.Dispatch<React.SetStateAction<string>>;
 }> = ({ setPage }) => {
   const theme = useTheme();
@@ -37,7 +38,21 @@ const Login: React.FC<{
   const submitData = async (data: LoginInterface) => {
     await dispatch(loginUser(data));
     setSwitchPage(true);
+    // console.log(user)
   };
+
+  // TODO: fix automatic login
+  const profileLogin = async () => {
+    try {
+      // const response = await axiosClient.get('api/v1/auth/profile');
+      // dispatch(getProfileAction(response.data))
+      await dispatch(loginProfile());
+      console.log(user)
+    } catch (e: any) {
+      console.log(e)
+      // return thunkApi.rejectWithValue(e.response.data);
+    }
+  }
 
   useEffect(() => {
     // console.log({ ...user, switchPage });
@@ -49,9 +64,19 @@ const Login: React.FC<{
     if (!user.serverResponse?.error && switchPage) {
       setSwitchPage(false);
       // navigates to the profile page
-      navigate('/profile');
+      if (user.first_name) navigate(`/${user.name}`);
+      // console.log(user)
     }
-  }, [user, switchPage, setSwitchPage, setOpenModal, navigate]);
+  }, [
+    user.serverResponse?.error,
+    user.first_name,
+    user.name,
+    switchPage,
+    setSwitchPage,
+    setOpenModal,
+    navigate,
+    dispatch,
+  ]);
 
   return (
     <Container
@@ -106,6 +131,7 @@ const Login: React.FC<{
                       size='small'
                       label='PASSWORD'
                       variant='standard'
+                      type='password'
                       sx={{ fontSize: '20px' }}
                       {...register('password')}
                     />
@@ -147,7 +173,7 @@ const Login: React.FC<{
                   px: '15px',
                 }}
               >
-                <Button variant='contained' size='small' sx={{ flex: 1 }}>
+                <Button variant='contained' size='small' sx={{ flex: 1 }} onClick={profileLogin}>
                   GOOGLE
                 </Button>
               </Container>
@@ -201,7 +227,7 @@ const Login: React.FC<{
           </Container>
         </Slide>
       </Container>
-      <InfoModal
+      <ErrorModal
         info={user.serverResponse?.message}
         openModal={openModal}
         setOpenModal={setOpenModal}
