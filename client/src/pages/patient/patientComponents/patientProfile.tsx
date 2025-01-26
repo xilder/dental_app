@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -11,6 +11,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Skeleton,
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -30,21 +31,23 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
 
   useEffect(() => {
-    const getProfileData = async () => {
-      try {
-        const response = await axiosClient.get(`/api/v1/auth/profile`);
-        const userProfile = await response.data;
-        dispatch(getProfileAction(userProfile));
-        // console.log(user);
-      } catch {
-        dispatch(reset());
-      }
-    };
+    // const getProfileData = async () => {
+    //   try {
+    //     const response = await axiosClient.get(`/api/v1/auth/profile`);
+    //     const userProfile = await response.data;
+    //     dispatch(getProfileAction(userProfile));
+    //     // console.log(user);
+    //   } catch {
+    //     dispatch(reset());
+    //   }
+    // };
     const getDoctors = async () => {
       try {
         const response = await axiosClient.get('/api/v1/resources/doctors');
-        const doctorList: [] = await response.data;
+        const doctorList: AppointmentDoctorData[] = await response.data;
         setDoctors(doctorList);
+
+        // setDoctors(doctorList);
         // console.log(doctorList);
       } catch (e) {
         console.log(e);
@@ -52,16 +55,22 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
     };
     const getAppointments = async () => {
       try {
-        const response = await axiosClient.get(`/api/v1/resources/patient_appointments/${user.id}`);
+        const response = await axiosClient.get(
+          `/api/v1/resources/patient_appointments/${user.id}`
+        );
         const appointmentList: AppointmentSummary[] = await response.data;
+        console.log(appointmentList)
         setAppointments(appointmentList);
       } catch (e) {
         console.log(e);
       }
+    };
+    const populateData = async () => {
+      // getProfileData();
+      await getDoctors();
+      await getAppointments();
     }
-    getProfileData();
-    getDoctors();
-    getAppointments();
+    populateData();
     if (!user.id) navigate('/accounts');
     // getDoctors();
   }, [dispatch, user.id, navigate, setDoctors, setAppointments]);
@@ -95,59 +104,62 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
           Book an appointment
         </Typography>
         <Box>
-          {doctors.length > 0 ? (
-            doctors.map((doctor) => (
-              <Card key={doctor.id} sx={{ display: 'flex' }}>
-                <CardMedia
-                  src='https://unsplash.com/photos/1e0vzv8Jv6M'
-                  sx={{
-                    height: '90px',
-                    width: '90px',
-                    borderRadius: '50%',
-                    // border: '1px solid red',
-                  }}
-                ></CardMedia>
-                <CardContent>
-                  <Typography variant='h5'>{`${doctor.first_name} ${doctor.last_name}`}</Typography>
-                  <Typography variant='body2'>{}</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Button
-                      variant='contained'
-                      size='small'
-                      sx={{ mr: '5px' }}
-                      onClick={() => setDialogID(doctor.id)}
-                    >
-                      BOOK CONSULT
-                    </Button>
-                    <Button variant='contained' size='small'>
-                      CHAT
-                    </Button>
-                    <Dialog
-                      open={doctor.id === dialogID}
-                      onClose={() => setDialogID('')}
-                      // scroll='paper'
-                      fullWidth
-                      // maxWidth={false}
-                    >
-                      <DialogTitle>
-                        SET APPOINTMENT WITH DR.
-                        {` ${doctor.first_name.toUpperCase()} ${doctor.last_name.toUpperCase()}`}
-                      </DialogTitle>
-                      <DialogContent dividers>
-                        <PatientAppointment
-                          doctor_id={doctor.id}
-                          patient_id={user.id}
-                          setDialogID={setDialogID}
-                        />
-                      </DialogContent>
-                    </Dialog>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <Typography variant='h4'>No doctors available</Typography>
-          )}
+          <Suspense fallback={<Skeleton />}>
+            {doctors.length > 0 ? (
+              doctors.map((doctor) => (
+                <Card key={doctor.id} sx={{ display: 'flex' }}>
+                  <CardMedia
+                    component='img'
+                    image={`https://api.dicebear.com/9.x/adventurer/svg?seed=${doctor.first_name}`}
+                    sx={{
+                      height: '90px',
+                      width: '90px',
+                      borderRadius: '50%',
+                      border: '1px solid red',
+                    }}
+                  />
+                  <CardContent>
+                    <Typography variant='h5'>{`${doctor.first_name} ${doctor.last_name}`}</Typography>
+                    <Typography variant='body2'>{}</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Button
+                        variant='contained'
+                        size='small'
+                        sx={{ mr: '5px' }}
+                        onClick={() => setDialogID(doctor.id)}
+                      >
+                        BOOK CONSULT
+                      </Button>
+                      <Button variant='contained' size='small'>
+                        CHAT
+                      </Button>
+                      <Dialog
+                        open={doctor.id === dialogID}
+                        onClose={() => setDialogID('')}
+                        // scroll='paper'
+                        fullWidth
+                        // maxWidth={false}
+                      >
+                        <DialogTitle>
+                          SET APPOINTMENT WITH DR.
+                          {` ${doctor.first_name.toUpperCase()} ${doctor.last_name.toUpperCase()}`}
+                        </DialogTitle>
+                        <DialogContent dividers>
+                          <PatientAppointment
+                            doctor_id={doctor.id}
+                            patient_id={user.id}
+                            setDialogID={setDialogID}
+                          />
+                        </DialogContent>
+                      </Dialog>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Typography variant='h4'>No doctors available</Typography>
+            )}
+          </Suspense>
         </Box>
       </Box>
       <Box
@@ -194,7 +206,7 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
                   >
                     <Typography>{appointment.doctor_name}</Typography>
                     <Typography>{appointment.complaints}</Typography>
-                    <Typography>{appointment.time}</Typography>
+                    <Typography>{appointment.appointment_time}</Typography>
                   </Box>
                 </Box>
               </>

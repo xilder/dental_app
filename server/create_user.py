@@ -1,9 +1,8 @@
-from pprint import pprint
 import secrets
 import json
-import requests
 from tests.test_models.test_engine.test_model import (
     TestModel,
+    DocModel,
     AppointmentModel,
 )
 from models.engine.db import db_client
@@ -14,23 +13,30 @@ from models.engine.db import db_client
 # r = requests.post('http://localhost:5000/api/v1/auth/login',
 #                   json={'data': 'jeremy', 'password': 'eget'})
 # print(r.json())
-MAX = 5
-MUL = 60
+MAX = 15
+MUL = 4
 
 try:
     doctors = []
     patients = []
+    a = 0
 
     for i in range(MAX):
-        d_params = TestModel().to_json()
-        doctor = db_client.add("doctor", **d_params)
-        d_params['id'] = doctor.id
-        doctors.append(d_params)
-        for j in range(MUL):
-            p_params = TestModel().to_json()
-            patient = db_client.add("patient", **p_params)
-            p_params['id'] = patient.id
-            patients.append(p_params)
+        try:
+            d_params = DocModel().to_json()
+            doctor = db_client.add("doctor", **d_params)
+            d_params['id'] = doctor.id
+            doctors.append(d_params)
+            a += 1
+            for j in range(MUL):
+                p_params = TestModel().to_json()
+                patient = db_client.add("patient", **p_params)
+                p_params['id'] = patient.id
+                patients.append(p_params)
+                a += 1
+                print(a)
+        except Exception:
+            continue
 
 
     with open('info.json', 'w') as f:

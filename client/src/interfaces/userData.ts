@@ -20,8 +20,9 @@ export default interface UserData {
 export interface AppointmentDoctorData {
   first_name: string;
   last_name: string;
-  title: string;
+  username: string;
+  rank: string;
+  email: string;
   id: string;
   about?: string;
-  specialties?: string;
 }

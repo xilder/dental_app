@@ -249,7 +249,7 @@ const AppointmentPage2 = ({ register, watch, control }: FormProps) => {
           rules={{ required: 'Date and time are required' }}
           render={({ field }) => (
             <DateTimePicker
-              label='Date and time of the appointment'
+              label='Date and time of the appointment in "Africa/Lagos" time'
               value={field.value}
               inputRef={field.ref}
               onChange={(date) => field.onChange(date)}

@@ -21,7 +21,7 @@ def register(role: str):
         if token:
             from tasks.accounts_task import send_verification_message
 
-            send_verification_message(user)
+            # send_verification_message(user)
         return make_response(
             f"A confirmation mail has been sent to {user.email}.",
             201,

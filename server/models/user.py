@@ -3,7 +3,7 @@
 
 from models.base import BaseModel, Base
 from models.messages import Message
-from sqlalchemy import Column, String, Boolean
+from sqlalchemy import Column, Enum, String, Boolean
 from sqlalchemy.orm import relationship
 
 
@@ -21,6 +21,7 @@ class User(BaseModel, Base):
     email = Column(String(60), unique=True, index=True, nullable=False)
     username = Column(String(60), unique=True, index=True, nullable=False)
     password = Column(String(60), nullable=False)
+    sex = Column(Enum('M', 'F'), default='M', nullable=False)
     token = Column(String(100), default="")
     session = Column(String(60), default="")
     authenticated = Column(Boolean, default=False)

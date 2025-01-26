@@ -1,5 +1,5 @@
 import { useEffect, useState, FC } from 'react';
-import { Box, TextField, IconButton, Button } from '@mui/material';
+import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { ChatMessage } from '../../../interfaces/message';
 import { Socket } from 'socket.io-client';
@@ -110,7 +110,7 @@ const PatientChat: FC<{ client: Socket; user: UserData }> = ({
         }}
       >
         {/* <ChatDisplay id={receiverID} messages={messages[receiverID]} /> */}
-        <Box sx={{ flex: 1, border: '1px solid red' }}></Box>
+        <Box sx={{ flex: 1, border: '1px solid red', width: '100%' }}></Box>
         <Box
           sx={{ p: 1, display: 'flex', alignItems: 'center', width: '100%' }}
         >
@@ -140,7 +140,7 @@ const PatientChat: FC<{ client: Socket; user: UserData }> = ({
           borderLeft: '2px solid black',
         }}
       >
-        {users.length > 0 &&
+        {users.length > 0 ?
           users.map((user_id) => {
             if (user_id !== user.id) {
               return (
@@ -157,7 +157,9 @@ const PatientChat: FC<{ client: Socket; user: UserData }> = ({
               );
             }
             return null;
-          })}
+          }) : (<>
+          <Typography>Begin chats on the profile screen to see chats here</Typography>
+          </>)}
       </Box>
       <Button
         onClick={() => client.emit('users', 'online')}

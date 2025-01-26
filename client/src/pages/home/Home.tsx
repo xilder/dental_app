@@ -49,16 +49,14 @@ const Home = () => {
         <Box
           sx={{
             ...theme.mixins.toolbar,
-            zIndex: '100',
-            backgroundColor: 'red'
           }}
-        ></Box>
+        />
         <Box
           sx={{
             mt: '2%',
             display: 'grid',
             placeItems: 'center',
-            mb: '30px',
+            mb: '15px',
             // border: '1px solid red',
           }}
         >
@@ -102,18 +100,23 @@ const Home = () => {
           sx={{
             flex: 1,
             width: '100%',
+            height: '300px',
             // border: '1px solid red',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
           }}
         >
-          {/* <Box
+          <Box
             component='img'
             alt='hero image'
             src={heroImage}
-            sx={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-          /> */}
+            sx={{
+              width: '100%',
+              height: 'inherit',
+              objectFit: 'cover',
+            }}
+          />
         </Box>
         <Grid
           container
@@ -228,10 +231,16 @@ const Home = () => {
               justifyContent: 'left',
             }}
           >
-            <Skeleton
-              variant='rectangular'
-              sx={{ height: '40%', width: '80%' }}
-            ></Skeleton>
+            <Box
+              component='img'
+              alt='portrait image'
+              src={portrait}
+              sx={{
+                width: '100%',
+                height: 'inherit',
+                objectFit: 'cover',
+              }}
+            />
           </Box>
         </Grid>
       </Container>

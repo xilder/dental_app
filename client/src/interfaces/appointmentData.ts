@@ -22,7 +22,7 @@ export default interface AppointmentInterface {
 export interface AppointmentSummary {
   doctor_name: string;
   complaints: string;
-  time: string;
+  appointment_time: string;
 }
 
 export interface FormProps<

@@ -26,7 +26,7 @@ class Doctor(User):
         nullable=False, default="House Officer"
     )
     about = Column(Text, nullable=True)
-    specialities = Column(MutableList.as_mutable(ARRAY(String)))
+    # specialities = Column(MutableList.as_mutable(ARRAY(String)), nullable=True)
     appointments = relationship(
         "Appointment", backref="doctor", cascade="delete, delete-orphan"
     )
