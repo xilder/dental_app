@@ -3,10 +3,10 @@ import { Box, TextField, IconButton, Button, Typography } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { ChatMessage } from '../../../interfaces/message';
 import { Socket } from 'socket.io-client';
-import moment from 'moment';
+// import moment from 'moment';
 import UserData from '../../../interfaces/userData';
 import PatientChatCard from './patientChatComponents/patientChatCard';
-import ChatDisplay from './patientChatComponents/chatDisplay';
+// import ChatDisplay from './patientChatComponents/chatDisplay';
 
 const PatientChat: FC<{ client: Socket; user: UserData }> = ({
   client,
@@ -14,9 +14,9 @@ const PatientChat: FC<{ client: Socket; user: UserData }> = ({
 }) => {
   const [newMessage, setNewMessage] = useState('');
   // const [messages, setMessages] = useState<ChatMessageArray>(chatFormat);
-  const [messages, setMessages] = useState<{ [key: string]: ChatMessage[] }>(
-    {}
-  );
+  // const [messages, setMessages] = useState<{ [key: string]: ChatMessage[] }>(
+  //   {}
+  // );
   const [users, setUsers] = useState<string[]>(['']);
   const [receiverID, setReceiverID] = useState('');
 
@@ -74,17 +74,17 @@ const PatientChat: FC<{ client: Socket; user: UserData }> = ({
       }
     }
   };
-  const [a, setA] = useState(0)
 
 
   useEffect(() => {
     // getChatHistory();
     client.on('receive_message', (data: ChatMessage) => {
-      setA(prev => prev + 1)
       console.log(data);
-      console.log(a);
     });
-  }, [client, a]);
+    return () => {
+      client.disconnect()
+    }
+  }, [client]);
 
   return (
     <Box

@@ -8,17 +8,33 @@ import {
   ListItemText,
   useTheme,
 } from '@mui/material';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { io } from 'socket.io-client';
 import DoctorProfile from './doctorComponents/doctorProfile';
 import DoctorChat from './doctorComponents/doctorChat';
 import DoctorSetting from './doctorComponents/doctorSetting';
-import { patientDrawer } from '../../constants/nav';
+import { doctorDrawer } from '../../constants/nav';
+import { useAppSelector, useAppDispatch } from '../../hooks/storeHooks';
+import { setClient } from '../../redux/reducers/clientReducer';
 const Doctor = () => {
+  const user = useAppSelector((store) => store.user);
+  const client = useAppSelector((store) => store.client);
+  const dispatch = useAppDispatch()
   const theme = useTheme();
   const [pageDisplayed, setPageDisplayed] = useState('Profile');
   const handlePageDisplayed = (value: string) => {
     setPageDisplayed(value);
   };
+  const [socket] = useState(
+    io('http://localhost:5000/chats', { transports: ['websocket'] })
+  );
+
+  useEffect(() => {
+    dispatch(setClient(socket))
+    return () => {
+      client.disconnect()
+    }
+  }, [client, dispatch, socket]);
   return (
     <Container maxWidth={false} disableGutters>
       <Box
@@ -47,12 +63,12 @@ const Doctor = () => {
           }}
         >
           <List>
-            {patientDrawer.map((item) => (
+            {doctorDrawer.map((item) => (
               <ListItemButton onClick={() => handlePageDisplayed(item.name)}>
                 <ListItemIcon>
-                  <Icon component={item.icon}></Icon>
+                  <Icon component={item.icon} />
                 </ListItemIcon>
-                <ListItemText primary={item.name}></ListItemText>
+                <ListItemText primary={item.name} />
               </ListItemButton>
             ))}
           </List>
@@ -74,7 +90,7 @@ const Doctor = () => {
           {pageDisplayed === 'Profile' ? (
             <DoctorProfile />
           ) : pageDisplayed === 'Chat' ? (
-            <DoctorChat />
+            <DoctorChat user={user} client={client} />
           ) : pageDisplayed === 'Setting' ? (
             <DoctorSetting />
           ) : (

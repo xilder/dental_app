@@ -98,3 +98,9 @@ export const patientDrawer = [
   { name: 'Chat', icon: ChatIcon },
   { name: 'Setting', icon: SettingsIcon },
 ];
+
+export const doctorDrawer = [
+  { name: 'Profile', icon: PersonIcon },
+  { name: 'Chat', icon: ChatIcon },
+  { name: 'Setting', icon: SettingsIcon },
+];

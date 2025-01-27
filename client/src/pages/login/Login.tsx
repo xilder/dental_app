@@ -15,9 +15,8 @@ import { useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../hooks/storeHooks';
 import LoginInterface from '../../interfaces/loginData';
 import { loginSchema } from '../../constants/schema';
-import { loginUser, loginProfile, getProfileAction } from '../../redux/reducers/userReducer';
+import { loginUser, loginProfile, reset } from '../../redux/reducers/userReducer';
 import { ErrorModal } from '../../components/infoModal';
-import axiosClient from '../../axiosClient/axiosClient';
 
 const Login: FC<{
   setPage: React.Dispatch<React.SetStateAction<string>>;
@@ -41,15 +40,14 @@ const Login: FC<{
     // console.log(user)
   };
 
-  // TODO: fix automatic login
+  // TODO: fix automatic login - not yet done
   const profileLogin = async () => {
     try {
       // const response = await axiosClient.get('api/v1/auth/profile');
       // dispatch(getProfileAction(response.data))
       await dispatch(loginProfile());
-      console.log(user)
     } catch (e: any) {
-      console.log(e)
+      dispatch(reset())
       // return thunkApi.rejectWithValue(e.response.data);
     }
   }

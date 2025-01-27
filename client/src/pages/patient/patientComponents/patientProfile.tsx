@@ -19,16 +19,31 @@ import UserData, { AppointmentDoctorData } from '../../../interfaces/userData';
 import { AppointmentSummary } from '../../../interfaces/appointmentData';
 import axiosClient from '../../../axiosClient/axiosClient';
 import PatientAppointment from './patientProfileComponents/patientAppointment';
-import { getProfileAction, reset } from '../../../redux/reducers/userReducer';
+// import { getProfileAction, reset } from '../../../redux/reducers/userReducer';
 import { useAppDispatch } from '../../../hooks/storeHooks';
+import { Socket } from 'socket.io-client';
 
-const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
+const PatientProfile: FC<{ user: UserData; client: Socket; }> = ({ user, client }) => {
   // const user = useAppSelector((store) => store.user);
+  // const client = useAppSelector((store) => store.client);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [dialogID, setDialogID] = useState<string>('');
   const [doctors, setDoctors] = useState<AppointmentDoctorData[]>([]);
   const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
+
+  const getAppointments = async () => {
+    try {
+      const response = await axiosClient.get(
+        `/api/v1/resources/patient_appointments/${user.id}`
+      );
+      const appointmentList: AppointmentSummary[] = await response.data;
+      console.log(appointmentList);
+      setAppointments(appointmentList);
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
     // const getProfileData = async () => {
@@ -59,7 +74,7 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
           `/api/v1/resources/patient_appointments/${user.id}`
         );
         const appointmentList: AppointmentSummary[] = await response.data;
-        console.log(appointmentList)
+        console.log(appointmentList);
         setAppointments(appointmentList);
       } catch (e) {
         console.log(e);
@@ -69,7 +84,7 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
       // getProfileData();
       await getDoctors();
       await getAppointments();
-    }
+    };
     populateData();
     if (!user.id) navigate('/accounts');
     // getDoctors();
@@ -87,7 +102,7 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
       <Box>
         <Typography variant='h4'>Hello {user.first_name}</Typography>
       </Box>
-      <Divider sx={{ mt: '5px' }}></Divider>
+      <Divider sx={{ mt: '5px' }} />
       <Box
         sx={{
           // border: '1px solid red',
@@ -135,7 +150,10 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
                       </Button>
                       <Dialog
                         open={doctor.id === dialogID}
-                        onClose={() => setDialogID('')}
+                        onClose={() => {
+                          setDialogID('');
+                          return getAppointments();
+                        }}
                         // scroll='paper'
                         fullWidth
                         // maxWidth={false}

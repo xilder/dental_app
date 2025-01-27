@@ -13,27 +13,31 @@ import PatientProfile from './patientComponents/patientProfile';
 import PatientChat from './patientComponents/patientChat';
 import PatientSetting from './patientComponents/patientSetting';
 import { io } from 'socket.io-client';
-import { useAppSelector } from '../../hooks/storeHooks';
+import { useAppSelector, useAppDispatch } from '../../hooks/storeHooks';
+import { setClient } from '../../redux/reducers/clientReducer';
 
 const Patient = () => {
   const user = useAppSelector((store) => store.user);
+  const dispatch = useAppDispatch()
+  const client = useAppSelector((store) => store.client);
   const theme = useTheme();
   const [pageDisplayed, setPageDisplayed] = useState('Profile');
   const handlePageDisplayed = (value: string) => {
     setPageDisplayed(value);
   };
-  const [client] = useState(
+  const [socket] = useState(
     io('http://localhost:5000/chats', { transports: ['websocket'] })
   );
 
   useEffect(() => {
+    dispatch(setClient(socket))
     client.on('connect', () => {
       console.log('Connected using:', client);
     });
     return () => {
       client.disconnect()
     }
-  }, [client]);
+  }, [client, dispatch, socket]);
 
   return (
     <Box
@@ -50,7 +54,7 @@ const Patient = () => {
         sx={{
           ...theme.mixins.toolbar,
         }}
-      ></Box>
+      />
       <Box
         sx={{
           display: 'flex',
@@ -98,13 +102,13 @@ const Patient = () => {
           }}
         >
           {pageDisplayed === 'Profile' ? (
-            <PatientProfile user={user} />
+            <PatientProfile user={user} client={client} />
           ) : pageDisplayed === 'Chat' ? (
             <PatientChat client={client} user={user} />
           ) : pageDisplayed === 'Setting' ? (
             <PatientSetting />
           ) : (
-            <PatientProfile user={user} />
+            <PatientProfile user={user} client={client} />
           )}
         </Box>
       </Box>

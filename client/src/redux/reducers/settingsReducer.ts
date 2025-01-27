@@ -18,7 +18,7 @@ export const loginUser = createAsyncThunk('user/login', async (params: any) => {
 const initialState: any = null;
 
 const settingSlice = createSlice({
-  name: 'userReducer',
+  name: 'settingReducer',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
