@@ -18,8 +18,7 @@ class TestDB(unittest.TestCase):
     def test_create(self):
         """test cases for creating objects"""
         params = TestModel().to_json()
-        user = User(**params)
-        db_client.add(user)
+        user = db_client.add('user', **params)
         obj = db_client.find_obj_by('user', id=user.id).first()
         if obj is not None:
             self.assertEqual(type(obj), User)
