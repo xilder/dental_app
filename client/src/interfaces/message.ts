@@ -1,5 +1,4 @@
-import moment from 'moment';
-import { Moment } from 'moment';
+// import moment from 'moment';
 
 export interface Message {
   sender: string;
@@ -11,7 +10,7 @@ export interface ChatMessage {
   sender_id: string;
   receiver_id: string;
   text: string;
-  created_at: Moment;
+  created_at: string;
 }
 
 export default interface ChatMessageArray {
@@ -23,7 +22,7 @@ export const chatFormat = {
 
 export const chatFormat2: ChatMessage[] = [
   {
-    sender_id: 'me', receiver_id: 'me', text: 'me', created_at: moment(),
+    sender_id: 'me', receiver_id: 'me', text: 'me', created_at: 'id',
     id: ''
   },
 ];

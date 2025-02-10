@@ -7,14 +7,13 @@ export default interface UserData {
   password?: string;
   created_at?: string;
   updated_at?: string;
-  serverResponse?: {
-    error?: boolean;
-    message?: string;
-  };
+  serverMessage?: string;
+  serverError?: boolean;
   loading?: boolean;
   confirmed?: boolean;
   authenticated?: boolean;
   name?: string;
+  type?: string;
 }
 
 export interface AppointmentDoctorData {

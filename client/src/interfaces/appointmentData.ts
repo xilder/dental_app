@@ -20,6 +20,7 @@ export default interface AppointmentInterface {
 }
 
 export interface AppointmentSummary {
+  id?: string;
   doctor_name: string;
   complaints: string;
   appointment_time: string;
