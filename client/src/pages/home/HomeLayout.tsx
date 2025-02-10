@@ -31,7 +31,7 @@ const HomeLayout = () => {
         <Toolbar
           disableGutters
           sx={{
-            borderBottom: '2px solid rgba(20, 20, 20, 0.1)',
+            borderBottom: '1px solid #14141490',
             px: '20px',
             display: 'flex',
             alignItems: 'center',
@@ -45,7 +45,8 @@ const HomeLayout = () => {
             }}
           >
             <Typography
-              sx={{ fontSize: '20px', fontWeight: 700, color: '#005969' }}
+              variant='h5'
+              sx={{ color: 'primary.main', fontFamily: 'Recursive, Poppins' }}
             >
               epitome
             </Typography>

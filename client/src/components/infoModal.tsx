@@ -48,10 +48,10 @@ const ErrorModal: React.FC<{
 };
 
 const InfoModal: React.FC<{
-  email: string | undefined;
+  info: string | undefined;
   openModal: boolean;
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
-}> = ({ email, openModal, setOpenModal }) => {
+}> = ({ info, openModal, setOpenModal }) => {
   const dispatch = useAppDispatch();
 
   return (
@@ -72,7 +72,7 @@ const InfoModal: React.FC<{
           <Divider sx={{ borderColor: '#0F0', fontSize: '5px' }} />{' '}
           <Typography
             sx={{ mt: 2 }}
-          >{`PLEASE CHECK YOUR EMAIL (${email}) FOR CONFIRMATION LINK`}</Typography>
+          >{info}</Typography>
         </Box>
       </Modal>
     </div>

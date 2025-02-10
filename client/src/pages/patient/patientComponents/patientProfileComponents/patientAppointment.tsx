@@ -63,7 +63,6 @@ const PatientAppointment: FC<{
   const [activeStep, setActiveStep] = useState(0);
 
   const handleNext = () => {
-    console.log(activeStep);
     setActiveStep((prevStep) => prevStep + 1);
   };
   const handlePrev = () => {
@@ -78,13 +77,12 @@ const PatientAppointment: FC<{
       ...data,
       appointment_time: data.appointment_time?.toISOString(),
     };
+    // TODO: handle successful appt
     try {
       const response = await axiosClient.post(
         '/api/v1/resources/appointments',
         modified_data
       );
-      console.log(data);
-      console.log(response);
       setDialogID('');
     } catch (e) {
       console.log(e);
@@ -100,7 +98,7 @@ const PatientAppointment: FC<{
           </Step>
         ))}
       </Stepper>
-      <Box sx={{ mb: '50px', border: '2px solid red' }}>
+      <Box sx={{ mb: '50px' }}>
         <form onSubmit={handleSubmit(submitData)}>
           <Box
           // sx={{ border: '2px solid green' }}
@@ -116,7 +114,7 @@ const PatientAppointment: FC<{
             ) : activeStep === 2 ? (
               <AppointmentPage3 getValues={getValues} />
             ) : (
-              <Typography>Submit or reset appointment details</Typography>
+              <Typography sx={{justifySelf: 'center', my: '10px'}}>Submit or reset appointment details</Typography>
             )}
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -242,7 +240,7 @@ const AppointmentPage2 = ({ register, watch, control }: FormProps) => {
           />
         </Grid>
       )}
-      <Grid item xs={8}>
+      <Grid item xs={8} sx={{ mt: '10px  ' }}>
         <Controller
           control={control}
           name='appointment_time'
@@ -267,20 +265,21 @@ const AppointmentPage3: FC<{
   const data = getValues();
   const returnIcon = (value: boolean) => {
     if (value) {
-      return <CheckIcon fontSize='small' sx={{ color: 'green' }} />;
+      return <CheckIcon fontSize='small' />;
     }
-    return <ClearIcon fontSize='small' sx={{ color: 'red' }} />;
+    return <ClearIcon fontSize='small' />;
   };
   return (
     <>
       <Stack>
         <Box>
-          <Typography component='h5' variant='h5'>
+          <Typography component='h5' variant='h6' sx={{ mb: '10px' }}>
             Your appointment details:
           </Typography>
         </Box>
         <Grid
           container
+          columns={12}
           sx={{
             flex: 1,
             display: 'flex',
@@ -289,87 +288,78 @@ const AppointmentPage3: FC<{
           }}
         >
           <Grid item>
-            <Typography component='h6' variant='h6'>
-              Complaints:
-            </Typography>
-            <Typography sx={{ ml: '15px' }}>{data.complaints}</Typography>
+            <Typography>Complaints: {data.complaints}</Typography>
           </Grid>
           {data.additional_info && (
             <Grid item>
-              <Typography component='h6' variant='h6'>
-                Additional Information:
-              </Typography>
-              <Typography sx={{ ml: '45px' }}>
-                {data.additional_info}
+              <Typography>
+                Additional Information: {data.additional_info}
               </Typography>
             </Grid>
           )}
-          <Grid container sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography component='h6' variant='h6'>
-              Sickle Cell: {returnIcon(data.sickle_cell)}
-            </Typography>
-          </Grid>
           <Grid item>
-            <Typography component='h6' variant='h6'>
-              Hypertension: {returnIcon(data.hypertension)}
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Typography component='h6' variant='h6'>
-              Diabetes: {returnIcon(data.diabetes)}
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Typography component='h6' variant='h6'>
-              Asthma: {returnIcon(data.asthma)}
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Typography component='h6' variant='h6'>
-              Peptic Ulcer Disease: {returnIcon(data.PUD)}
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Typography component='h6' variant='h6'>
-              Lupus: {returnIcon(data.SLE)}
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Typography component='h6' variant='h6'>
-              Epilepsy: {returnIcon(data.epilepsy)}
-            </Typography>
-          </Grid>
-          <Grid item>
-            <Typography component='h6' variant='h6'>
-              Allergies: {returnIcon(data.allergies)}
-            </Typography>
-          </Grid>
-          {data.allergies && (
-            <Grid item>
-              <Typography component='h6' variant='h6'>
-                Details about allergy:
-              </Typography>
-              <Typography>{data.allergies_info}</Typography>
-            </Grid>
-          )}
-          {data.others && (
-            <Grid item>
-              <Typography component='h6' variant='h6'>
-                Other important medical information:
-              </Typography>
-              <Typography>{data.others}</Typography>
-            </Grid>
-          )}
-          <Grid item>
-            <Typography component='h6' variant='h6'>
-              Time of appointment:{' '}
-            </Typography>
             <Typography>
+              Time of appointment:{' '}
               {data.appointment_time
                 ? data.appointment_time.format('dddd, MMMM Do YYYY, h:mm a')
                 : ''}
             </Typography>
           </Grid>
+          <Grid container columns={12} sx={{ mt: '10px' }}>
+            <Grid item xs={6}>
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                Sickle Cell: {returnIcon(data.sickle_cell)}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                Hypertension: {returnIcon(data.hypertension)}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                Diabetes: {returnIcon(data.diabetes)}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                Asthma: {returnIcon(data.asthma)}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                Peptic Ulcer Disease: {returnIcon(data.PUD)}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                Lupus: {returnIcon(data.SLE)}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                Epilepsy: {returnIcon(data.epilepsy)}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography sx={{ display: 'flex', alignItems: 'center' }}>
+                Allergies: {returnIcon(data.allergies)}
+              </Typography>
+            </Grid>
+          </Grid>
+          {data.allergies && (
+            <Grid item>
+              <Typography>Details about allergy:</Typography>
+              <Typography>{data.allergies_info}</Typography>
+            </Grid>
+          )}
+          {data.others && (
+            <Grid item>
+              <Typography>
+                Other important medical information: {data.others}
+              </Typography>
+            </Grid>
+          )}
         </Grid>
       </Stack>
     </>

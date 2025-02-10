@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect, FC, Dispatch, SetStateAction } from 'react';
 import {
   Button,
   Container,
@@ -9,7 +9,6 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../hooks/storeHooks';
@@ -18,17 +17,13 @@ import { InfoModal, ErrorModal } from '../../components/infoModal';
 import RegistrationInterface from '../../interfaces/registrationData';
 import { registerSchema } from '../../constants/schema';
 const Register: FC<{
-  setPage: React.Dispatch<React.SetStateAction<string>>;
+  setPage: Dispatch<SetStateAction<string>>;
 }> = ({ setPage }) => {
   const theme = useTheme();
-  // allows enables navigation for this page to the next page
-  const [email, setEmail] = useState('');
-  const [switchPage, setSwitchPage] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState<'info' | 'error'>('info');
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.user);
-  const navigate = useNavigate();
   const { register, formState, handleSubmit } = useForm<RegistrationInterface>({
     mode: 'onTouched',
     resolver: zodResolver(registerSchema),
@@ -36,22 +31,18 @@ const Register: FC<{
   const { errors, isDirty, isValid, isSubmitting } = formState;
   const submitData = async (data: RegistrationInterface) => {
     await dispatch(registerUser(data));
-    setEmail(data.email);
-    setSwitchPage(true);
   };
 
   useEffect(() => {
-    if (user.serverResponse?.error) {
-      setSwitchPage(false);
+    if (user.serverError) {
       setModalType('error');
       setOpenModal(true);
     }
-    if (!user.serverResponse?.error && switchPage) {
-      setSwitchPage(false);
+    else if (!user.serverError && user.serverMessage) {
       setModalType('info');
       setOpenModal(true);
     }
-  }, [user, switchPage, navigate, setOpenModal, email, modalType]);
+  }, [user.serverError, user.serverMessage]);
 
   return (
     <Container
@@ -249,13 +240,13 @@ const Register: FC<{
       </Container>
       {modalType === 'info' ? (
         <InfoModal
-          email={email}
+          info={user.serverMessage}
           openModal={openModal}
           setOpenModal={setOpenModal}
         />
       ) : (
         <ErrorModal
-          info={user.serverResponse?.message}
+          info={user.serverMessage}
           openModal={openModal}
           setOpenModal={setOpenModal}
         />

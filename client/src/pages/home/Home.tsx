@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-// import { Container } from '@mui/joy';
 import {
   Box,
   Button,
   Container,
   Typography,
-  Skeleton,
   useTheme,
   Grid,
   Divider,
@@ -62,6 +60,7 @@ const Home = () => {
         >
           <Typography
             component='h2'
+            variant='h2'
             sx={{
               // border: '1px solid red',
               textAlign: 'center',
@@ -75,7 +74,6 @@ const Home = () => {
             Comfort of Your Home Today
           </Typography>
           <Typography
-            variant='body2'
             gutterBottom={true}
             sx={{ textAlign: 'center' }}
           >
@@ -145,9 +143,7 @@ const Home = () => {
                 }}
               >
                 <Grid item>
-                  <Typography sx={{ fontSize: '16px' }}>
-                    {stat.label}
-                  </Typography>
+                  <Typography>{stat.label}</Typography>
                 </Grid>
                 <Grid item>
                   {' '}
@@ -200,7 +196,7 @@ const Home = () => {
                 <br />
                 Anywhere
               </Typography>
-              <Typography sx={{ fontSize: '16px', lineHeight: ' 24px' }}>
+              <Typography>
                 Our online dental telemedicine app allows you to easily connect
                 <br />
                 with a dentist from the comfort off your home. Get expert and
@@ -263,7 +259,7 @@ const Home = () => {
           sx={{
             ...theme.mixins.toolbar,
           }}
-        ></Box>
+        />
         <Box
           sx={{
             display: 'flex',
@@ -280,7 +276,6 @@ const Home = () => {
               fontSize: '44px',
               color: 'white',
               flex: 1,
-              // borderTop: '5px solid white',
               // borderRight: '5px solid white',
             }}
           >
@@ -345,13 +340,14 @@ const Home = () => {
                   p: '10px',
                   mb: '30px',
                   borderRadius: '50%',
+                  // TODO: make better function for colour
                   backgroundColor: 'rgba(0, 59, 69, 0.1)',
                 }}
               >
                 <Icon
                   component={service.icon}
-                  sx={{ color: theme.palette.primary.main, fontSize: '20px' }}
-                ></Icon>
+                  sx={{ color: 'primary.main', fontSize: '20px' }}
+                />
               </Box>
               <Typography
                 gutterBottom

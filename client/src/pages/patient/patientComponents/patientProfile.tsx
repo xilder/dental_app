@@ -1,5 +1,4 @@
-import { FC, useEffect, useState, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, Suspense, useContext } from 'react';
 import {
   Box,
   Button,
@@ -15,65 +14,16 @@ import {
 } from '@mui/material';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CircleIcon from '@mui/icons-material/Circle';
-import UserData, { AppointmentDoctorData } from '../../../interfaces/userData';
-import { AppointmentSummary } from '../../../interfaces/appointmentData';
-import axiosClient from '../../../axiosClient/axiosClient';
 import PatientAppointment from './patientProfileComponents/patientAppointment';
-import { getProfileAction, reset } from '../../../redux/reducers/userReducer';
-import { useAppDispatch } from '../../../hooks/storeHooks';
+import { useAppSelector } from '../../../hooks/storeHooks';
+import { AppointmentsContext, DoctorsContext } from '../patientContext';
 
-const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
-  // const user = useAppSelector((store) => store.user);
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+const PatientProfile = () => {
+  const user = useAppSelector((store) => store.user);
   const [dialogID, setDialogID] = useState<string>('');
-  const [doctors, setDoctors] = useState<AppointmentDoctorData[]>([]);
-  const [appointments, setAppointments] = useState<AppointmentSummary[]>([]);
+  const doctors = useContext(DoctorsContext);
+  const appointments = useContext(AppointmentsContext);
 
-  useEffect(() => {
-    // const getProfileData = async () => {
-    //   try {
-    //     const response = await axiosClient.get(`/api/v1/auth/profile`);
-    //     const userProfile = await response.data;
-    //     dispatch(getProfileAction(userProfile));
-    //     // console.log(user);
-    //   } catch {
-    //     dispatch(reset());
-    //   }
-    // };
-    const getDoctors = async () => {
-      try {
-        const response = await axiosClient.get('/api/v1/resources/doctors');
-        const doctorList: AppointmentDoctorData[] = await response.data;
-        setDoctors(doctorList);
-
-        // setDoctors(doctorList);
-        // console.log(doctorList);
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    const getAppointments = async () => {
-      try {
-        const response = await axiosClient.get(
-          `/api/v1/resources/patient_appointments/${user.id}`
-        );
-        const appointmentList: AppointmentSummary[] = await response.data;
-        console.log(appointmentList)
-        setAppointments(appointmentList);
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    const populateData = async () => {
-      // getProfileData();
-      await getDoctors();
-      await getAppointments();
-    }
-    populateData();
-    if (!user.id) navigate('/accounts');
-    // getDoctors();
-  }, [dispatch, user.id, navigate, setDoctors, setAppointments]);
   return (
     <Box
       sx={{
@@ -85,9 +35,9 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
       }}
     >
       <Box>
-        <Typography variant='h4'>Hello {user.first_name}</Typography>
+        <Typography variant='h4'>Hello, {user.first_name}</Typography>
       </Box>
-      <Divider sx={{ mt: '5px' }}></Divider>
+      <Divider sx={{ mt: '5px' }} />
       <Box
         sx={{
           // border: '1px solid red',
@@ -96,30 +46,33 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
           width: '100%',
           mt: '10px',
           overflowY: 'scroll',
-          height: '300px',
-          maxHeight: '350px',
+          // height: '300px',
+          maxHeight: '300px',
         }}
       >
-        <Typography variant='h5' sx={{ mt: '15px' }}>
-          Book an appointment
+        <Typography variant='h6' sx={{ mt: '15px' }}>
+          Book an appointment with a doctor
         </Typography>
         <Box>
           <Suspense fallback={<Skeleton />}>
             {doctors.length > 0 ? (
               doctors.map((doctor) => (
-                <Card key={doctor.id} sx={{ display: 'flex' }}>
+                <Card
+                  key={doctor.id}
+                  sx={{ display: 'flex', alignItems: 'center' }}
+                >
                   <CardMedia
                     component='img'
                     image={`https://api.dicebear.com/9.x/adventurer/svg?seed=${doctor.first_name}`}
                     sx={{
-                      height: '90px',
-                      width: '90px',
+                      height: '80px',
+                      width: '80px',
                       borderRadius: '50%',
-                      border: '1px solid red',
+                      // border: '1px solid red',
                     }}
                   />
                   <CardContent>
-                    <Typography variant='h5'>{`${doctor.first_name} ${doctor.last_name}`}</Typography>
+                    <Typography variant='h5'>{`Dr. ${doctor.first_name} ${doctor.last_name}`}</Typography>
                     <Typography variant='body2'>{}</Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                       <Button
@@ -181,7 +134,7 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
         <Box>
           {appointments.length > 0 ? (
             appointments.map((appointment) => (
-              <>
+              <Box key={appointment.id}>
                 <Divider />
                 <Box sx={{ display: 'flex' }}>
                   <Box
@@ -209,7 +162,7 @@ const PatientProfile: FC<{ user: UserData }> = ({ user }) => {
                     <Typography>{appointment.appointment_time}</Typography>
                   </Box>
                 </Box>
-              </>
+              </Box>
             ))
           ) : (
             <Typography component='h5'>

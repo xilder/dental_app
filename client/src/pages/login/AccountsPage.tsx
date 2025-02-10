@@ -1,7 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Button, Container, useTheme } from '@mui/material';
-// import { registerSchema } from '../../constants/register';
-// import MuiForms from 'mui-forms';
+import { useState } from 'react';
+import { Box, Container, useTheme } from '@mui/material';
 import Login from './Login';
 import Register from './Register';
 
@@ -32,13 +30,13 @@ const AccountsPage = () => {
       ) : (
         ''
       )}
-      <Button
+      {/* <Button
         onClick={() =>
           page === 'register' ? setPage('login') : setPage('register')
         }
       >
         {page}
-      </Button>
+      </Button> */}
     </Container>
   );
 };

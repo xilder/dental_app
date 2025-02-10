@@ -1,4 +1,5 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
+import moment from 'moment';
 import { ChatMessage } from '../../../../interfaces/message';
 import {
   Card,
@@ -7,24 +8,28 @@ import {
   Typography,
   List,
   ListItem,
-  ListItemText,
+  // ListItemText,
+  Box,
 } from '@mui/material';
-import theme from '../../../../theme/theme';
 import axiosClient from '../../../../axiosClient/axiosClient';
+import { useAppSelector } from '../../../../hooks/storeHooks';
+// import { useAppSelector } from '../../../../hooks/storeHooks';
 
-const ChatDisplay: FC<{ messages: ChatMessage[]; id: string }> = ({
+const ChatDisplay: FC<{ messages: ChatMessage[]; chateeID: string }> = ({
   messages,
-  id,
+  chateeID,
 }) => {
+  const user = useAppSelector((store) => store.user);
   const [fullName, setFullName] = useState('');
 
   useEffect(() => {
     const getFullName = async () => {
       try {
         const response = await axiosClient.get(
-          `/api/v1/resources/get_name/${id}`
+          `/api/v1/resources/full_name/${chateeID}`
         );
-        const { name } = await response.data;
+        const name = await response.data;
+        // console.log(name);
         setFullName(name);
       } catch (e) {
         console.log(e);
@@ -32,51 +37,107 @@ const ChatDisplay: FC<{ messages: ChatMessage[]; id: string }> = ({
       }
     };
     getFullName();
-  }, [id]);
+  }, [chateeID]);
   return (
     <>
-      <Card
-        sx={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          flexDirection: 'row',
-          mx: '',
-          backgroundColor: theme.palette.primary.light,
-        }}
-      >
-        <CardMedia
-          sx={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '50%',
-            border: '1px solid black',
-            m: '5px',
-          }}
-          src='https://api.dicebear.com/9.x/adventurer/svg'
-        />
-        <CardContent>
-          <Typography variant='h6'>Name</Typography>
-        </CardContent>
-      </Card>
-      <List sx={{ flexGrow: 1, overflowY: 'scroll', width: '100%' }}>
-        {messages.map((message) => {
-          const time = message.created_at.format('HH:mm dddd - MMMM D, YYYY');
-          return (
-            <ListItem
-              key={message.id}
+      {chateeID ? (
+        <>
+          <Box sx={{ width: '100%' }}>
+            <Card
               sx={{
-                alignSelf: message.sender_id === id ? 'flex-start' : 'flex-end',
+                width: '100%',
                 display: 'flex',
-                flexDirection: 'column',
+                alignItems: 'center',
+                flexDirection: 'row',
+                height: 'fit-content',
+                // mx: '',
+                backgroundColor: 'primary.light',
               }}
             >
-              <Typography>{fullName}</Typography>
-              <ListItemText primary={message.text} secondary={time} />
-            </ListItem>
-          );
-        })}
-      </List>
+              <CardMedia
+                sx={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  border: '1px solid black',
+                  m: '5px',
+                }}
+                image={`https://api.dicebear.com/9.x/adventurer/svg?seed=${
+                  fullName.split(' ')[1]
+                }`}
+              />
+              <CardContent>
+                <Typography variant='h4'>{fullName}</Typography>
+              </CardContent>
+            </Card>
+          </Box>
+          <List
+            sx={{
+              flexGrow: 1,
+              overflowY: 'scroll',
+              width: '100%',
+              border: '1px solid red'
+              //   display: 'flex',
+              //   alignItems: 'center',
+              //   flexDirection: 'column',
+              //   justifyContent: 'center',
+            }}
+          >
+            {messages &&
+              messages.map((message) => {
+                const time = moment(message.created_at).format(
+                  'MMMM Do YYYY, h:mm a'
+                );
+                return (
+                  <ListItem
+                    disablePadding
+                    key={message.id}
+                    sx={{
+                      alignItems:
+                        message.sender_id === chateeID
+                          ? 'flex-start'
+                          : 'flex-end',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      // border: '1px solid green',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        // width: '60%',
+                        mt: '5px',
+                      }}
+                    >
+                      <Typography variant='h6'>
+                        {message.sender_id === user.id ? 'You' : fullName}
+                      </Typography>
+                      <Typography>{message.text}</Typography>
+                      <Typography variant='body2'>{time}</Typography>
+                    </Box>
+                    {/* <ListItemText primary={message.text} secondary={time} /> */}
+                    {/* <Typography variant='body2'>{`Sender: ${message.sender_id}\nReceiver: ${message.receiver_id}\nUser: ${user.id}`}</Typography> */}
+                  </ListItem>
+                );
+              })}
+          </List>
+        </>
+      ) : (
+        <Box
+          sx={{
+            flexGrow: 1,
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            display: 'flex',
+          }}
+        >
+          <Typography component='h6' variant='h6'>
+            Select a chat to begin
+          </Typography>
+        </Box>
+      )}
     </>
   );
 };

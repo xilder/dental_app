@@ -15,68 +15,34 @@ import { useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../hooks/storeHooks';
 import LoginInterface from '../../interfaces/loginData';
 import { loginSchema } from '../../constants/schema';
-import { loginUser, loginProfile, getProfileAction } from '../../redux/reducers/userReducer';
+import { loginUser, loginProfile } from '../../redux/reducers/userReducer';
 import { ErrorModal } from '../../components/infoModal';
-import axiosClient from '../../axiosClient/axiosClient';
 
 const Login: FC<{
   setPage: React.Dispatch<React.SetStateAction<string>>;
 }> = ({ setPage }) => {
   const theme = useTheme();
-  // this variable is used by the useEffect page to navigate to the profile page. Used together with the changes in user to determine if login was successful
-  const [switchPage, setSwitchPage] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  // console.log(switchPage)
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const user = useAppSelector((store) => store.user);
+  // const [sessionUser, setSessionUser] = useState(false)
 
   const { register, formState, handleSubmit } = useForm<LoginInterface>({
     resolver: zodResolver(loginSchema),
   });
   const { isDirty, isValid, isSubmitting } = formState;
-  const submitData = async (data: LoginInterface) => {
+  const submitData = async (data: LoginInterface) =>
     await dispatch(loginUser(data));
-    setSwitchPage(true);
-    // console.log(user)
-  };
-
-  // TODO: fix automatic login
-  const profileLogin = async () => {
-    try {
-      // const response = await axiosClient.get('api/v1/auth/profile');
-      // dispatch(getProfileAction(response.data))
-      await dispatch(loginProfile());
-      console.log(user)
-    } catch (e: any) {
-      console.log(e)
-      // return thunkApi.rejectWithValue(e.response.data);
-    }
-  }
+  const profileLogin = async () => await dispatch(loginProfile());
 
   useEffect(() => {
-    // console.log({ ...user, switchPage });
-    if (user.serverResponse?.error) {
-      setSwitchPage(false);
+    // if (!sessionUser) profileLogin()
+    if (user.serverError) {
       setOpenModal(true);
-    }
-    // user is supposed to be change if login was successful
-    if (!user.serverResponse?.error && switchPage) {
-      setSwitchPage(false);
-      // navigates to the profile page
-      if (user.first_name) navigate(`/${user.name}`);
-      // console.log(user)
-    }
-  }, [
-    user.serverResponse?.error,
-    user.first_name,
-    user.name,
-    switchPage,
-    setSwitchPage,
-    setOpenModal,
-    navigate,
-    dispatch,
-  ]);
+    } else if (user.name) navigate(`/${user.name}`);
+    // else profileLogin();
+  }, [user.serverMessage, user.name, setOpenModal, navigate, dispatch, user.serverError, user]);
 
   return (
     <Container
@@ -157,13 +123,13 @@ const Login: FC<{
               >
                 <Divider
                   sx={{ borderColor: 'gray', borderWidth: 1, flex: 1 }}
-                ></Divider>
+                />
                 <Typography sx={{ mx: '1px', fontSize: '12px' }}>
                   or sign in with
                 </Typography>
                 <Divider
                   sx={{ borderColor: 'gray', borderWidth: 1, flex: 1 }}
-                ></Divider>
+                />
               </Container>
               <Container
                 sx={{
@@ -173,8 +139,13 @@ const Login: FC<{
                   px: '15px',
                 }}
               >
-                <Button variant='contained' size='small' sx={{ flex: 1 }} onClick={profileLogin}>
-                  GOOGLE
+                <Button
+                  variant='contained'
+                  size='small'
+                  sx={{ flex: 1 }}
+                  onClick={profileLogin}
+                >
+                  RESUME SESSION
                 </Button>
               </Container>
             </Container>
@@ -228,7 +199,7 @@ const Login: FC<{
         </Slide>
       </Container>
       <ErrorModal
-        info={user.serverResponse?.message}
+        info={user.serverMessage}
         openModal={openModal}
         setOpenModal={setOpenModal}
       />
