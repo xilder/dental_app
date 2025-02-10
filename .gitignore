@@ -6,6 +6,6 @@
 ./typescript
 ./.vscode
 ./main
-**/dump.rdb
+./dump.rdb
 **/push
 **/main./typescript
