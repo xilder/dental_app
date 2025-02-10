@@ -1,22 +1,14 @@
 #!usr/bin/python3
-from typing import Any, Optional
+from typing import Any
 from bcrypt import checkpw
 from sqlalchemy.exc import NoResultFound
-
 # from errors.account_error import UnconfirmedAccountError
-from models.engine.db import db_client
-from models.user import User
+from models.engine.db import db_client, UserTypes
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from config import config
-from models.engine.db import T
-# from flask import session
-
-# def _generate_uuid() -> str:
-#     """returns the string value of a uuid"""
-#     return str(uuid4())
 
 
-def verify_token(token: str) -> Optional[str]:
+def verify_token(token: str):
     try:
         serialiser = URLSafeTimedSerializer(config.dev.SECRET_KEY)
         email = serialiser.loads(
@@ -59,11 +51,11 @@ class Auth:
                     return False
         return True
 
-    def find_user_by(self, cls="patient", **query: Any) -> Optional[User]:
+    def find_user_by(self, cls: UserTypes = "patient", **query: Any):
         """returns a user"""
         return self._db.find_user_by(cls=cls, **query)
 
-    def register_user(self, cls: str, **kwargs: Any) -> Optional[User]:
+    def register_user(self, cls: UserTypes, **kwargs: Any):
         """registers a new user"""
         email, username = (
             kwargs["email"],
@@ -82,10 +74,10 @@ class Auth:
         x_user = self._db.find_user_by(cls=cls, id=user.id)
         return x_user
 
-    def update(self, id, cls="patient", **kwargs: Any) -> Optional[T]:
+    def update(self, id, cls: UserTypes = "patient", **kwargs: Any):
         return self._db.update(cls=cls, obj_id=id, **kwargs)
 
-    def valid_login(self, cls="patient", **kwargs) -> Optional[T]:
+    def valid_login(self, cls: UserTypes = "patient", **kwargs):
         """returns true if user's credentials are valid"""
         try:
             user = self._db.find_user_by_login(cls=cls, **kwargs)
@@ -95,7 +87,7 @@ class Auth:
             #     )
             if not user:
                 return None
-            password: str | None = kwargs.get("password", None)
+            password = kwargs.get("password", None)
             if not password:
                 return None
             if checkpw(
@@ -131,7 +123,7 @@ class Auth:
     #     """destroys a session by setting user session_id to None"""
     #     return self._db.update('user', user_id, session=None)
 
-    def get_reset_token(self, email: str, cls="patient") -> str | None:
+    def get_reset_token(self, email: str, cls: UserTypes = "patient"):
         """generates a reset token"""
         user = self._db.find_user_by(cls=cls, email=email)
         if not user:
@@ -142,7 +134,7 @@ class Auth:
             return None
         return token
 
-    def get_user_from_token(self, token: str, cls="patient") -> User | None:
+    def get_user_from_token(self, token: str, cls: UserTypes = "patient"):
         """returns a user id token is valid"""
         try:
             verified = verify_token(token)
@@ -160,8 +152,8 @@ class Auth:
             return None
 
     def update_password(
-        self, token: str, password: str, cls="patient"
-    ) -> bool:
+        self, token: str, password: str, cls: UserTypes = "patient"
+    ):
         """updates a user password"""
         user = self._db.find_user_by(cls=cls, token=token)
         if not user:

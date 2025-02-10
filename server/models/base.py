@@ -40,14 +40,10 @@ class BaseModel:
                     self.id = kwargs.get("id", self.id)
 
                 elif k == "created_at" and type(v) is str:
-                    self.created_at = datetime.strptime(
-                        kwargs["created_at"], TIME_FORMAT
-                    )
+                    self.created_at = datetime.fromisoformat(v)
 
                 elif k == "updated_at" and type(v) is str:
-                    self.updated_at = datetime.strptime(
-                        kwargs["updated_at"], TIME_FORMAT
-                    )
+                    self.updated_at = datetime.fromisoformat(v)
 
                 elif k == "password":
                     hashed_password = _hash_password(password=v)
@@ -81,8 +77,9 @@ class BaseModel:
         new_obj = self.__dict__.copy()
         for k, v in new_obj.items():
             if k in ["created_at", "updated_at"]:
-                new_obj[k] = v.strftime(TIME_FORMAT)
+                new_obj[k] = v.isoformat(timespec="minutes")
         if "password" in new_obj:
             del new_obj["password"]
         del new_obj["_sa_instance_state"]
+        # print(new_obj)
         return new_obj

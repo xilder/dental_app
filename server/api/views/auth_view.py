@@ -1,14 +1,14 @@
 from flask import abort, jsonify, make_response, request, session
 from itsdangerous import SignatureExpired
 from api.views import app_view
-from models.engine.auth import Auth
+from models.engine.auth import Auth, UserTypes
 from errors.account_error import UnconfirmedAccountError
 
 AUTH = Auth()
 
 
 @app_view.route("/register/<role>", methods=["POST"])
-def register(role: str):
+def register(role: UserTypes):
     """registration route"""
     if not request.get_json():
         return make_response(jsonify("Not a JSON"), 400)
@@ -17,11 +17,12 @@ def register(role: str):
         user = AUTH.register_user(cls=role, **user_params)
         if not user:
             return make_response("Registration failed", 400)
-        token = AUTH.get_reset_token(cls=role, email=str(user.email))
-        if token:
-            from tasks.accounts_task import send_verification_message
 
+        # token = AUTH.get_reset_token(cls=role, email=str(user.email))
+        # if token:
+        #     from tasks.accounts_task import send_verification_message
             # send_verification_message(user)
+
         return make_response(
             f"A confirmation mail has been sent to {user.email}.",
             201,
@@ -29,10 +30,10 @@ def register(role: str):
     except Exception as e:
         # AUTH.delete_user(user.id)
         return make_response(str(e), 401)
-
+ 
 
 @app_view.route("/confirmation/<role>/<token>")
-def confirmation(role: str, token: str):
+def confirmation(role: UserTypes, token: str):
     try:
         if not token:
             abort(404)
@@ -55,7 +56,7 @@ def confirmation(role: str, token: str):
         return make_response("Invalid token", 403)
 
 
-@app_view.route("/login/", methods=["POST"])
+@app_view.route("/login", methods=["POST"])
 def login():
     """login route"""
     try:
@@ -69,7 +70,7 @@ def login():
             return make_response("Invalid login credentials", 404)
         # TODO: add check for account confirmation
         session_user = user.to_json()
-        for key in ["updated_at", "created_at", "type", "session", "token"]:
+        for key in ["updated_at", "created_at", "session", "token"]:
             del session_user[key]
         session["user_id"] = user.id
         session["user"] = session_user
@@ -121,7 +122,7 @@ def delete_user():
 
 
 @app_view.route("/change_password", methods=["POST"])
-def change_password(token):
+def change_password():
     """Change Password"""
     user_params = request.get_json()
     password = user_params.get("password", None)

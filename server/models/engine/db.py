@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """DB module"""
 
-from typing import Any, Union, Optional
+from typing import Any, Literal, Union, Optional
 from models.user import User
 from models.doctor import Doctor
 from models.patient import Patient
@@ -9,10 +9,8 @@ from models.messages import Message
 from models.appointment import Appointment
 from models.diagnosis import Diagnosis
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Query
-from sqlalchemy.orm.session import Session
+from sqlalchemy.orm import sessionmaker, scoped_session, Query
 from models.base import Base
-from typing import Type
 import os
 
 
@@ -23,7 +21,11 @@ host = os.getenv("DB_HOST") or "localhost"
 SQLALCHEMY_DATABASE_URI = f"mysql+mysqldb://{username}:{passwd}@{host}/{db}"
 
 T = Union[User, Patient, Doctor, Message, Appointment, Diagnosis]
-classes: dict[str, Type[T]] = {
+ClassTypes = Literal[
+    "user", "patient", "doctor", "message", "appointment", "diagnosis"
+]
+UserTypes = Literal["user", "patient", "doctor"]
+classes = {
     "user": User,
     "patient": Patient,
     "doctor": Doctor,
@@ -40,17 +42,14 @@ class DBClient:
         """initialises a new DB instance"""
         self._engine = create_engine(SQLALCHEMY_DATABASE_URI)
         Base.metadata.create_all(self._engine)
-        self.__session = None
+        self.__session = scoped_session(sessionmaker(bind=self._engine))
 
     @property
-    def _session(self) -> Session:
+    def _session(self):
         """Memoised session object"""
-        if self.__session is None:
-            DBSession = sessionmaker(bind=self._engine)
-            self.__session = DBSession()
         return self.__session
 
-    def add(self, cls: str, **kwargs: Any) -> Optional[T]:
+    def add(self, cls: ClassTypes, **kwargs: Any) -> Optional[T]:
         """adds a new object to the database"""
         try:
             obj = classes[cls](**kwargs)
@@ -62,11 +61,13 @@ class DBClient:
             print(e)
             return None
 
-    def find_obj_by(self, cls: str, **query: Any) -> Query[T]:
+    def find_obj_by(self, cls: ClassTypes, **query: Any) -> Query[T]:
         """returns the obj that matches the query"""
         return self._session.query(classes[cls]).filter_by(**query)
 
-    def find_user_by(self, cls="patient", **kwargs: Any) -> Optional[User]:
+    def find_user_by(
+        self, cls: UserTypes = "patient", **kwargs: Any
+    ) -> Optional[User]:
         """returns queried user"""
         user = self.find_obj_by(cls=cls, **kwargs).first()
         if not isinstance(user, User):
@@ -74,7 +75,7 @@ class DBClient:
         return user
 
     def find_user_by_login(
-        self, cls="patient", **kwargs: Any
+        self, cls: UserTypes = "patient", **kwargs: Any
     ) -> Optional[User]:
         """returns queried user"""
         email = kwargs.get("email")
@@ -86,7 +87,7 @@ class DBClient:
             return None
         return user
 
-    def update(self, cls: str, id: str, **kwargs: Any) -> Optional[T]:
+    def update(self, cls: ClassTypes, id: str, **kwargs: Any) -> Optional[T]:
         """updates an object"""
         try:
             obj = self.find_obj_by(cls, id=id).first()
@@ -100,7 +101,9 @@ class DBClient:
             self._session.rollback()
             return None
 
-    def get_name_by_id(self, id: str, cls: str = 'user') -> Optional[str]:
+    def get_name_by_id(
+        self, id: str, cls: ClassTypes = "user"
+    ) -> Optional[str]:
         """returns the name of the object"""
         obj = self.find_obj_by(cls, id=id).first()
         if not obj or not isinstance(obj, User):

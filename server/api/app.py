@@ -90,7 +90,7 @@ def before_request():
 
     if AUTH.require_auth(request.path, excluded_path):
         if id is None:
-            return make_response(jsonify(error="unauthorised user"), 403)
+            return make_response(jsonify("unauthorised user"), 403)
 
 
 @app.teardown_appcontext
