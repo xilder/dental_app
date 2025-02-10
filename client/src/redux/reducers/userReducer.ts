@@ -21,9 +21,8 @@ export const registerUser = createAsyncThunk(
       );
       return response.data;
     } catch (e: any) {
-      return thunkApi.rejectWithValue(e.response.data);
+      return thunkApi.rejectWithValue(e.message);
     }
-    // console.log(response.data, response.status)
   }
 );
 
@@ -32,10 +31,9 @@ export const loginProfile = createAsyncThunk(
   async (_, thunkApi) => {
     try {
       const response = await axiosClient.get('api/v1/auth/profile');
-      console.log(response.data);
       return response.data;
     } catch (e: any) {
-      return thunkApi.rejectWithValue(e.response.data);
+      return thunkApi.rejectWithValue(e.message);
     }
   }
 );
@@ -47,7 +45,19 @@ export const loginUser = createAsyncThunk(
       const response = await axiosClient.post(`/api/v1/auth/login`, params);
       return response.data;
     } catch (e: any) {
-      return thunkApi.rejectWithValue(e.response.data);
+      return thunkApi.rejectWithValue(e.message);
+    }
+  }
+);
+
+export const logoutUser = createAsyncThunk(
+  'user/logout',
+  async (_, thunkApi) => {
+    try {
+      const response = await axiosClient.delete(`/api/v1/auth/logout`);
+      return response.data;
+    } catch (e: any) {
+      return thunkApi.rejectWithValue(e.message);
     }
   }
 );
@@ -76,11 +86,10 @@ const defaultState: UserData = {
   username: '',
   email: '',
   loading: false,
-  serverResponse: {
-    error: false,
-    message: '',
-  },
+  serverError: false,
+  serverMessage: '',
   name: '',
+  type: '',
 };
 
 const userSlice = createSlice({
@@ -104,88 +113,84 @@ const userSlice = createSlice({
         ...state,
         ...action.payload,
         loading: false,
-        serverResponse: {
-          error: false,
-          message: '',
-        },
+        serverError: false,
+        serverMessage: '',
       }))
       .addCase(loginUser.pending, () => ({
         ...defaultState,
         loading: true,
-        serverResponse: {
-          error: false,
-          message: '',
-        },
+        serverError: false,
+        serverMessage: '',
       }))
       .addCase(loginUser.rejected, (_, action) => ({
         ...defaultState,
         loading: false,
-        serverResponse: {
-          error: true,
-          message: action.payload as string,
-        },
+        serverError: true,
+        serverMessage: action.payload as string,
       }))
       .addCase(loginProfile.fulfilled, (state, action) => ({
         ...state,
         ...action.payload,
         loading: false,
-        serverResponse: {
-          error: false,
-          message: '',
-        },
+        serverError: false,
+        serverMessage: '',
       }))
       .addCase(loginProfile.pending, (state) => ({
         ...state,
         loading: true,
-        serverResponse: {
-          error: false,
-          message: '',
-        },
+        serverError: false,
+        serverMessage: '',
       }))
       .addCase(loginProfile.rejected, (state, action) => ({
         ...state,
         loading: false,
-        serverResponse: {
-          error: true,
-          message: action.payload as string,
-        },
+        serverError: false,
+        serverMessage: action.payload as string,
+      }))
+      .addCase(logoutUser.fulfilled, () => ({
+        ...defaultState,
+      }))
+      .addCase(logoutUser.pending, (state, _) => ({
+        ...state,
+        loading: true,
+        serverError: false,
+        serverMessage: '',
+      }))
+      .addCase(logoutUser.rejected, (state, action) => ({
+        ...state,
+        loading: false,
+        serverError: true,
+        serverMessage: action.payload as string,
       }))
       .addCase(registerUser.fulfilled, (_, action) => ({
         ...defaultState,
-        serverResponse: { error: false, message: action.payload as string },
+        serverError: false,
+        serverMessage: action.payload as string,
       }))
       .addCase(registerUser.pending, () => ({
         ...defaultState,
         loading: true,
-        serverResponse: {
-          error: false,
-          message: '',
-        },
+        serverError: false,
+        serverMessage: '',
       }))
       .addCase(registerUser.rejected, (_, action) => ({
         ...defaultState,
         loading: false,
-        serverResponse: {
-          error: true,
-          message: action.payload as string,
-        },
+        serverError: true,
+        serverMessage: action.payload as string,
       }))
       .addCase(deleteUser.fulfilled, () => defaultState)
       .addCase(deleteUser.pending, (state) => ({
         ...state,
         loading: true,
-        serverResponse: {
-          error: false,
-          message: '',
-        },
+        serverError: false,
+        serverMessage: '',
       }))
-      .addCase(deleteUser.rejected, (state) => ({
+      .addCase(deleteUser.rejected, (state, action) => ({
         ...state,
         loading: false,
-        serverResponse: {
-          error: false,
-          message: '',
-        },
+        serverError: false,
+        serverMessage: action.payload as string,
       }));
   },
 });

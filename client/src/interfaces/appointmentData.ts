@@ -1,4 +1,4 @@
-import { Control, RegisterOptions, useForm, UseFormRegister } from 'react-hook-form';
+import { Control, UseFormRegister } from 'react-hook-form';
 import { Moment } from 'moment';
 
 export default interface AppointmentInterface {
